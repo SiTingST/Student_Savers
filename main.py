@@ -54,8 +54,8 @@ END = ConversationHandler.END
 bot_data = {
     'event_name': '',
     'event_detail': '',
-    'event_date': '',
-    'event_time': ''
+    'event_date':'',
+    'event_time':''
 }
 
 PORT = int(os.environ.get('PORT', 5000))
@@ -83,17 +83,13 @@ def start(update, context):
         InlineKeyboardButton(text='Reminder System', callback_data=str(EVENT_HANDLING)),
         InlineKeyboardButton(text='Room Searching', callback_data=str(ROOM_SEARCHING))
     ]]
+
+    context.chat_data["tele-username"] = update.message.from_user.username
+
     context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
     context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
 
     keyboard = InlineKeyboardMarkup(buttons)
-
-    if context.user_data.get("START_OVER"):
-        update.callback_query.answer()
-        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-    else:
-        context.chat_data["tele-username"] = update.message.from_user.username
-        update.message.reply_text(text=text, reply_markup=keyboard)
 
     update.message.reply_text(text=text, reply_markup=keyboard)
 
@@ -204,8 +200,6 @@ def stop(update, context):
 
 # Second level conversation callbacks
 def select_building(update, context):
-    context.user_data["START_OVER"] = True
-
     text = 'Choose your action:'
 
     buttons = [[
@@ -580,7 +574,6 @@ def event_handling(update, context):
 
     return HANDLING_EVENT
 
-
 def edit_event_name(update, context):
     text = 'Please enter the event name'
 
@@ -635,7 +628,7 @@ def set_event_time(update, context):
 
     text = 'Please send /confirm to continue, otherwise /edit'
 
-    context.bot.send_message(chat_id=update.message.chat_id, text=text)
+    context.bot.send_message(chat_id = update.message.chat_id, text=text)
 
     # update.message.reply_text(text=text)
 
@@ -687,8 +680,7 @@ def set_timer(update, context):
 
 
 def alarm(context):
-    event = 'Reminder \n\n' + context.job.context['event_name'] + '\n' + context.job.context['event_detail'] + '\non ' + \
-            context.job.context['event_date'] + ' at ' + context.job.context['event_time']
+    event = 'Reminder \n\n' + context.job.context['event_name'] + '\n' + context.job.context['event_detail'] + '\non ' + context.job.context['event_date'] + ' at ' + context.job.context['event_time']
 
     context.bot.send_message(context.job.context['chat_id'], text=event)
 
@@ -705,13 +697,12 @@ def add_to_calendar(update, context):
 
 def check_email(email):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-    if (re.search(regex, email)):
+    if(re.search(regex, email)):
         logger.info("Valid email")
         return True
     else:
         logger.info("Invalid email")
         return False
-
 
 def ask_confirm_add_cal(update, context):
     message = update.message.text
@@ -724,7 +715,6 @@ def ask_confirm_add_cal(update, context):
 
     return EMAIL
 
-
 def ask_for_email(update, context):
     message = update.message.text
 
@@ -736,7 +726,6 @@ def ask_for_email(update, context):
 
     return CALENDAR
 
-
 def confirm_add_to_calendar(update, context):
     input_email = context.chat_data['user_email']
     event_name = context.chat_data['event_name']
@@ -744,7 +733,7 @@ def confirm_add_to_calendar(update, context):
     event_date = context.chat_data['event_date']
     event_time = context.chat_data['event_time']
 
-    if (check_email(input_email) == True):
+    if(check_email(input_email) == True):
         response = book_timeslot(event_name, event_detail, event_date, event_time, input_email)
         if (response == True):
             text = 'Event has been added to Google Calendar'
@@ -752,7 +741,7 @@ def confirm_add_to_calendar(update, context):
             text = 'Errors'
 
         update.message.reply_text(text)
-        return end_second_level(update, context)
+        return end_second_level(update,context)
     else:
         text = 'Please enter a valid email'
         update.message.reply_text(text)
@@ -876,6 +865,7 @@ def main():
         }
     )
 
+
     # Event handling ConversationHandler
     event_handling_convo = ConversationHandler(
         entry_points=[CallbackQueryHandler(event_handling,
@@ -895,7 +885,7 @@ def main():
                 MessageHandler(Filters.text, set_event_time)
             ],
             TIMER: [
-                CommandHandler('confirm', set_timer, pass_args=True, pass_job_queue=True, pass_chat_data=True),
+                CommandHandler('confirm', set_timer, pass_args=True, pass_job_queue=True , pass_chat_data=True),
                 CommandHandler('edit', edit_event_name)
             ],
             CONFIRM_ADD_CAL: [
@@ -920,13 +910,14 @@ def main():
             CommandHandler('stop', stop_nested)
         ],
 
-        map_to_parent={
+        map_to_parent = {
             # Return to top level menu
             END: SELECTING_ACTION,
             # End conversation alltogether
             STOPPING: END,
         }
     )
+
 
     # Set up top level ConversationHandler (selecting action)
     # Because the states of the third level conversation map to the ones of the second level
