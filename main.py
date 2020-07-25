@@ -284,7 +284,7 @@ def select_level(update, context):
             InlineKeyboardButton(text='Level 1', callback_data='Level1')
         ], [
             InlineKeyboardButton(text='Level 2', callback_data='Level2'),
-            InlineKeyboardButton(text='Back', callback_data=str(BACK_TO_MAIN_MENU))
+            InlineKeyboardButton(text='Back', callback_data=str(END))
         ]]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -868,24 +868,12 @@ def main():
                                                                                                         'COMS1_check-in',
                                                                                                         'COMS2_check-in'
                                                                                                         ))],
-            SELECT_BUILDING2: [CallbackQueryHandler(select_building2)],
-            CHECK_OUT: [CallbackQueryHandler(check_out_service)],
-            CHOOSE_CHECK_OUT_TIME: [CallbackQueryHandler(choose_check_out_time)],
-            SELECTING_LEVEL2: [CallbackQueryHandler(show_all_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$'
-                                                    .format('LevelB1_check-in',
-                                                            'Level1_check-in',
-                                                            'Level2_check-in',
-                                                            'Level3_check-in',
-                                                            'Level4_check-in'))],
-            FINISH_SELECTING_LEVEL2: [CallbackQueryHandler(finsh_selecting_level2)],
-            CHECK_IN_TIME: [MessageHandler(Filters.text, save_input_checkin)],
-            SUCCESSFUL_CHECK_IN: [CallbackQueryHandler(check_in_successfully)],
+
 
             SELECTING_LEVEL: [input_time_convo]
         },
 
         fallbacks=[
-            CallbackQueryHandler(end_second_level, pattern='^' + str(END) + '$'),
             CallbackQueryHandler(end_second_level, pattern='^' + str(END) + '$'),
             CommandHandler('stop', stop_nested)
         ],
@@ -893,7 +881,6 @@ def main():
         map_to_parent={
             # After showing data return to top level menu
             SHOWING: SHOWING,
-            BACK_TO_MAIN_MENU: SELECTING_ACTION,
             # Return to top level menu
             END: SELECTING_ACTION,
             # End conversation alltogether
