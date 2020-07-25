@@ -2,6 +2,7 @@ import json
 import logging
 import os
 
+from psycopg2._range import DateTimeRange
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from telegram import InlineKeyboardMarkup
@@ -42,6 +43,9 @@ CALENDAR = map(chr, range(23, 24))
 CONFIRM_ADD_CAL = map(chr, range(24, 25))
 EVENT_TIME = map(chr, range(25, 26))
 HANDLING_EVENT2 = map(chr, range(26, 27))
+
+BACK_TO_MAIN_MENU = map(chr, range(27, 28))
+
 
 import re
 from scheduler import book_timeslot
@@ -99,42 +103,57 @@ def start(update, context):
 
 
 def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
-    url = "https://api.nusmods.com/v2/2019-2020/semesters/2/venueInformation.json"
+    url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
     http = urllib3.PoolManager()
     json_obj = http.request('GET', url)
     text = json.loads(json_obj.data.decode('UTF-8'))
-
     current_weekNo = roomSearch.return_weekNo(date)
-    available_rooms = []
+
+    unavailableRoom = []
 
     for rooms in list_of_rooms:
 
-        if text[rooms][0]["classes"]:
+        for index in range(len(text[rooms])):
 
-            for index in range(0, len(text[rooms][0]["classes"])):
+            if text[rooms][index]["classes"]:
 
-                weekNo = text[rooms][0]["classes"][index]["weeks"]
+                for class_index in range(len(text[rooms][index]["classes"])):
 
-                for num in weekNo:
+                    weekNo = text[rooms][index]["classes"][class_index]["weeks"]
 
-                    if int(current_weekNo) == num:
+                    for num in weekNo:
 
-                        if text[rooms][0]["classes"][index]["day"] == day:
+                        if int(current_weekNo) == num:
 
-                            start_classTime = datetime.datetime.strptime(text[rooms][0]["classes"][index]["startTime"],
-                                                                         '%H%M').time()
+                            if text[rooms][index]["classes"][class_index]["day"] == day:
 
-                            end_classTime = datetime.datetime.strptime(text[rooms][0]["classes"][index]["endTime"],
-                                                                       '%H%M').time()
+                                start_hour = (text[rooms][index]["classes"][class_index]["startTime"][0:2])
+                                start_min = (text[rooms][index]["classes"][class_index]["startTime"][2:4])
 
-                            if start_time < start_classTime and end_time < end_classTime:
-                                available_rooms.append(rooms)
-                            elif available_rooms.count(rooms) > 0:
-                                available_rooms.remove(rooms)
-                                break
-                        else:
-                            available_rooms.append(rooms)
+                                end_hour = (text[rooms][index]["classes"][class_index]["endTime"][0:2])
+                                end_min = (text[rooms][index]["classes"][class_index]["endTime"][2:4])
+
+                                currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+
+                                lesson_start = datetime.datetime(
+                                    int(currentDate.strftime("%Y")),
+                                    int(currentDate.strftime("%m")),
+                                    int(currentDate.strftime("%d")),
+                                    int(start_hour), int(start_min), 0)
+
+                                lesson_end = datetime.datetime(
+                                    int(currentDate.strftime("%Y")),
+                                    int(currentDate.strftime("%m")),
+                                    int(currentDate.strftime("%d")),
+                                    int(end_hour), int(end_min), 0)
+
+                                lesson_range = DateTimeRange(pytz.utc.localize(lesson_start),
+                                                             pytz.utc.localize(lesson_end))
+                                searchTime = DateTimeRange(pytz.utc.localize(start_time), pytz.utc.localize(end_time))
+
+                                if lesson_range.is_intersection(searchTime):
+                                    unavailableRoom.append(rooms)
 
     start_time_string = start_time.strftime("%H%M")
     end_time_string = end_time.strftime("%H%M")
@@ -146,7 +165,12 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
                 values)
 
     sqlresult = cur.fetchall()
-    available_rooms = list(dict.fromkeys(available_rooms))
+    unavailableRoom = list(dict.fromkeys(unavailableRoom))
+
+    for r in unavailableRoom:
+        list_of_rooms.remove(r)
+
+    available_rooms = list_of_rooms
 
     for checked_in_rooms in sqlresult:
         checked_in_rooms = ''.join(''.join(map(str, checked_in_rooms)).split('),'))
@@ -156,40 +180,51 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
 
     return available_rooms
 
-
 def show_data(update, context):
+    currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+
     if context.chat_data["building"] == "COMS1":
         room_label = roomSearch.com1_data(context.chat_data["level"])
-
     else:
         room_label = roomSearch.com2_data(context.chat_data["level"])
-        print(room_label)
 
     available_rooms_data = callNusmodApi(context.chat_data["date"], context.chat_data["day"],
-                                         context.chat_data["start_time"], context.chat_data["end_time"],
+                                         context.chat_data["avail_start_time"],
+                                         context.chat_data["callback_avail_end_time"],
                                          room_label)
+
     if len(available_rooms_data) > 0:
-        text = 'Rooms available are : '
+
+        text = "Rooms available are (From: " + roomSearch.convert_time_to_12hr(
+            context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
+            context.chat_data["avail_end_time"]) + ") : "
 
         for rooms in available_rooms_data:
             text += '\n' + rooms
 
+        context.chat_data["avail_rooms"] = available_rooms_data
+
+        buttons = [[
+            InlineKeyboardButton(text='Check in', callback_data='avail_room_check-in'),
+            InlineKeyboardButton(text='Back', callback_data=str(END))
+        ]]
+
+
     else:
         text = " No available room found"
 
-    context.chat_data["avail_rooms"] = available_rooms_data
+        context.chat_data["avail_rooms"] = available_rooms_data
 
-    buttons = [[
-        InlineKeyboardButton(text='Check in', callback_data='check-in'),
-        InlineKeyboardButton(text='Back', callback_data=str(END))
-    ]]
+        buttons = [[
+            InlineKeyboardButton(text='Check in', callback_data='avail_room_check-in'),
+            InlineKeyboardButton(text='Back', callback_data=str(END))
+        ]]
 
     keyboard = InlineKeyboardMarkup(buttons)
 
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return SHOWING
-
 
 def stop(update, context):
     """End Conversation by command."""
@@ -249,7 +284,7 @@ def select_level(update, context):
             InlineKeyboardButton(text='Level 1', callback_data='Level1')
         ], [
             InlineKeyboardButton(text='Level 2', callback_data='Level2'),
-            InlineKeyboardButton(text='Back', callback_data=str(END))
+            InlineKeyboardButton(text='Back', callback_data=str(BACK_TO_MAIN_MENU))
         ]]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -858,6 +893,7 @@ def main():
         map_to_parent={
             # After showing data return to top level menu
             SHOWING: SHOWING,
+            BACK_TO_MAIN_MENU: SELECTING_ACTION,
             # Return to top level menu
             END: SELECTING_ACTION,
             # End conversation alltogether
