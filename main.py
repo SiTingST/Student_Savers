@@ -245,7 +245,7 @@ def select_building(update, context):
         InlineKeyboardButton(text='Check Out', callback_data='checkout')
     ],
         [
-            InlineKeyboardButton(text='Back', callback_data=str(END))
+            InlineKeyboardButton(text='Back', callback_data=str(BACK_TO_MAIN_MENU))
         ]]
 
     keyboard = InlineKeyboardMarkup(buttons)
@@ -848,7 +848,6 @@ def main():
 
         map_to_parent={
             # Return to second level menu
-            END: SELECTING_LEVEL,
             # End conversation alltogether
             STOPPING: STOPPING,
         }
@@ -867,20 +866,17 @@ def main():
                                                                                                         'checkout',
                                                                                                         'COMS1_check-in',
                                                                                                         'COMS2_check-in'
-                                                                                                        ))],
+                                                                                                        ))]
 
 
-            SELECTING_LEVEL: [input_time_convo]
         },
 
         fallbacks=[
-            CallbackQueryHandler(end_second_level, pattern='^' + str(END) + '$'),
+            CallbackQueryHandler(end_second_level, pattern='^' + str(BACK_TO_MAIN_MENU) + '$'),
             CommandHandler('stop', stop_nested)
         ],
 
         map_to_parent={
-            # After showing data return to top level menu
-            SHOWING: SHOWING,
             # Return to top level menu
             END: SELECTING_ACTION,
             # End conversation alltogether
