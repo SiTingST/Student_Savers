@@ -859,15 +859,7 @@ def main():
                                            pattern='^' + str(ROOM_SEARCHING) + '$')],
 
         states={
-            SELECT_BUILDING: [CallbackQueryHandler(select_level,
-                                                   pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$'.format('COMS1',
-                                                                                                        'COMS2',
-                                                                                                        'checkin',
-                                                                                                        'checkout',
-                                                                                                        'COMS1_check-in',
-                                                                                                        'COMS2_check-in'
-                                                                                                        ))]
-
+           
 
         },
 
