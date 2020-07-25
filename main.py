@@ -828,12 +828,13 @@ def main():
     # Set up third level ConversationHandler (collecting features)
     input_time_convo = ConversationHandler(
         entry_points=[CallbackQueryHandler(ask_for_input,
-                                           pattern='^{0}$|^{1}$|^{2}$|^${3}|^${4}|$'
+                                           pattern='^{0}$|^{1}$|^{2}$|^${3}|^${4}|^${5}|$'
                                            .format('LevelB1',
                                                    'Level1',
                                                    'Level2',
                                                    'Level3',
-                                                   'Level4'
+                                                   'Level4',
+                                                   str(END)
                                                    ))],
 
         states={
