@@ -597,6 +597,7 @@ def stop_nested(update, context):
     return STOPPING
 
 
+
 # Sending reminders
 
 def event_handling(update, context):
@@ -853,7 +854,7 @@ def main():
     )
 
     select_level_selection_handlers = [
-        CallbackQueryHandler(end_second_level, pattern='^back_to_main_menu$'),
+        CallbackQueryHandler(event_handling, pattern='^{0}$'.format('back_to_main_menu')),
         input_time_convo
     ]
     # Set up second level ConversationHandler (selecting building)
