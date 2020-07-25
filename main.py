@@ -75,23 +75,27 @@ con = psycopg2.connect(user="dzwnjonhbsmqyu",
 cur = con.cursor()
 
 
-# Top level conversation callbacks
 def start(update, context):
     text = 'Hi, welcome to Studentsavers bot. Glad to have you here. What do you want to do? Room Searching is only ' \
            'available for SoC buildings. To abort, simply type /stop.'
     buttons = [[
-        InlineKeyboardButton(text='Reminder System', callback_data=str(EVENT_HANDLING)),
+        InlineKeyboardButton(text='Event Handling', callback_data=str(EVENT_HANDLING)),
         InlineKeyboardButton(text='Room Searching', callback_data=str(ROOM_SEARCHING))
     ]]
-
-    context.chat_data["tele-username"] = update.message.from_user.username
 
     context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
     context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
 
     keyboard = InlineKeyboardMarkup(buttons)
 
-    update.message.reply_text(text=text, reply_markup=keyboard)
+    if context.user_data.get("START_OVER"):
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    else:
+        context.chat_data["tele-username"] = update.message.from_user.username
+        update.message.reply_text(text=text, reply_markup=keyboard)
+
+    context.user_data["START_OVER"] = True
 
     logger.info('/start command triggered')
 
