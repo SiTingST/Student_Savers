@@ -880,10 +880,7 @@ def main():
         ],
 
         map_to_parent={
-            # Return to top level menu
-            END: SELECTING_ACTION,
-            # End conversation alltogether
-            STOPPING: END,
+           
         }
     )
 
