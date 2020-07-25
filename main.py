@@ -44,7 +44,6 @@ CONFIRM_ADD_CAL = map(chr, range(24, 25))
 EVENT_TIME = map(chr, range(25, 26))
 HANDLING_EVENT2 = map(chr, range(26, 27))
 
-BACK_TO_MAIN_MENU = map(chr, range(27, 28))
 
 
 import re
@@ -245,7 +244,7 @@ def select_building(update, context):
         InlineKeyboardButton(text='Check Out', callback_data='checkout')
     ],
         [
-            InlineKeyboardButton(text='Back', callback_data=str(BACK_TO_MAIN_MENU))
+            InlineKeyboardButton(text='Back', callback_data='back_to_main_menu')
         ]]
 
     keyboard = InlineKeyboardMarkup(buttons)
@@ -854,7 +853,7 @@ def main():
     )
 
     select_level_selection_handlers = [
-        CallbackQueryHandler(end_second_level, pattern='^' + str(BACK_TO_MAIN_MENU) + '$'),
+        CallbackQueryHandler(end_second_level, pattern='^back_to_main_menu$'),
         input_time_convo
     ]
     # Set up second level ConversationHandler (selecting building)
@@ -876,7 +875,6 @@ def main():
         },
 
         fallbacks=[
-            CallbackQueryHandler(end_second_level, pattern='^' + str(BACK_TO_MAIN_MENU) + '$'),
             CommandHandler('stop', stop_nested)
         ],
 
