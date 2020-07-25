@@ -955,7 +955,6 @@ def main():
 
         states={
             SELECTING_ACTION: selection_handlers,
-            SELECT_BUILDING: selection_handlers,
             HANDLING_EVENT: selection_handlers,
             STOPPING: [CommandHandler('start', start)],
         },
