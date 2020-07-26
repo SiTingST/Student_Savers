@@ -853,10 +853,7 @@ def main():
         }
     )
 
-    select_level_selection_handlers = [
-        CallbackQueryHandler(event_handling, pattern='^{0}$'.format('back_to_main_menu')),
-        input_time_convo
-    ]
+
     # Set up second level ConversationHandler (selecting building)
     choose_building_convo = ConversationHandler(
         entry_points=[CallbackQueryHandler(select_building,
@@ -871,16 +868,17 @@ def main():
                                                                                                         'COMS1_check-in',
                                                                                                         'COMS2_check-in'
                                                                                                         ))],
-            SELECTING_LEVEL: [select_level_selection_handlers]
+            SELECTING_LEVEL: [input_time_convo]
 
         },
 
         fallbacks=[
+            CallbackQueryHandler(end_second_level, pattern='^{0}$'.format('back_to_main_menu')),
             CommandHandler('stop', stop_nested)
         ],
 
         map_to_parent={
-           
+            END: SELECTING_ACTION
         }
     )
 
