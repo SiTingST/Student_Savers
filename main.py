@@ -371,6 +371,7 @@ def select_level_checkin(update, context):
     context.chat_data["building"] = update.callback_query.data.split("_")[0]
 
     if update.callback_query.data == "end_checkin":
+        print("end check in")
         return select_building_checkin(update, context)
 
     else:
@@ -553,6 +554,7 @@ def confirm_timing2(update, context):
 # used for check-in
 def show_all_level(update, context):
     if update.callback_query.data == "end_checkin2":
+        print("line 557")
         return select_building_checkin(update, context)
     else:
         context.chat_data['level'] = update.callback_query.data
