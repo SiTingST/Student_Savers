@@ -627,6 +627,11 @@ def end_choose_action(update, context):
 
     return END
 
+def stop_nested(update, context):
+    """Completely end conversation from within nested conversation."""
+    update.message.reply_text('Hope to see you again!.')
+
+    return STOPPING
 
 def confirm_time(update, context):
     text = 'Got it! Do click on the respective buttons to move on.'
