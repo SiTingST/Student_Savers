@@ -236,6 +236,11 @@ def stop(update, context):
 
     return END
 
+def end_second_level(update, context):
+    """Return to top level conversation."""
+    start(update, context)
+
+    return END
 # Second level conversation callbacks
 def select_building(update, context):
     text = 'Choose your action:'
