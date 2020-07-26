@@ -17,32 +17,36 @@ import roomSearch
 SELECTING_ACTION, ROOM_SEARCHING, EVENT_HANDLING, HANDLING_EVENT = map(chr, range(4))
 # State definitions for second level conversation
 SELECT_BUILDING, SELECTING_LEVEL = map(chr, range(4, 6))
-SELECT_BUILDING2 = map(chr, range(6, 7))
-SELECTING_LEVEL2 = map(chr, range(7, 8))
+SELECT_CHECKIN_BUILDING = map(chr, range(6, 7))
+SELECTING_ROOM = map(chr, range(7, 8))
 FINISH_SELECTING_LEVEL2 = map(chr, range(8, 9))
-CHECK_IN_TIME = map(chr, range(9, 10))
-SUCCESSFUL_CHECK_IN = map(chr, range(10, 11))
-CHECK_OUT = map(chr, range(11, 12))
-CHOOSE_CHECK_OUT_TIME = map(chr, range(12, 13))
+SELECT_START_TIME = map(chr, range(9, 10))
+SELECT_END_TIME = map(chr, range(10, 11))
+CHECK_IN_TIME = map(chr, range(11, 12))
+SUCCESSFUL_CHECK_IN = map(chr, range(12, 13))
+CHECK_OUT = map(chr, range(13, 14))
+SELECT_OPTIONS_FOR_TIMING = map(chr, range(14, 15))
 
 # State definitions for descriptions conversation
-TYPING, SAVE_TIMING = map(chr, range(13, 15))
+SELECT_OPTIONS_FOR_TIMING2 = map(chr, range(15, 16))
 
-SELECTED_ROOM = map(chr, range(15, 16))
+SELECTED_ROOM = map(chr, range(17, 18))
 
 # Meta states
-STOPPING, SHOWING = map(chr, range(16, 18))
+STOPPING, SHOWING = map(chr, range(19, 21))
+END_SELECT_LEVEL = map(chr, range(21, 22))
+
 
 # States for Event Handling
-EVENT_DETAILS = map(chr, range(18, 19))
-EVENT_DATE = map(chr, range(19, 20))
-TIMER = map(chr, range(20, 21))
-EVENT_DATE = map(chr, range(21, 22))
-EMAIL = map(chr, range(22, 23))
-CALENDAR = map(chr, range(23, 24))
-CONFIRM_ADD_CAL = map(chr, range(24, 25))
-EVENT_TIME = map(chr, range(25, 26))
-HANDLING_EVENT2 = map(chr, range(26, 27))
+EVENT_DETAILS = map(chr, range(22, 23))
+EVENT_DATE = map(chr, range(23, 24))
+TIMER = map(chr, range(24, 25))
+EVENT_DATE = map(chr, range(25, 26))
+EMAIL = map(chr, range(26, 27))
+CALENDAR = map(chr, range(27, 28))
+CONFIRM_ADD_CAL = map(chr, range(28, 29))
+EVENT_TIME = map(chr, range(29, 30))
+HANDLING_EVENT2 = map(chr, range(30, 31))
 
 
 
@@ -179,6 +183,7 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
 
     return available_rooms
 
+
 def show_data(update, context):
     currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
 
@@ -231,7 +236,6 @@ def stop(update, context):
 
     return END
 
-
 # Second level conversation callbacks
 def select_building(update, context):
     text = 'Choose your action:'
@@ -244,7 +248,7 @@ def select_building(update, context):
         InlineKeyboardButton(text='Check Out', callback_data='checkout')
     ],
         [
-            InlineKeyboardButton(text='Back', callback_data='back_to_main_menu')
+            InlineKeyboardButton(text='Back', callback_data="end_select_action")
         ]]
 
     keyboard = InlineKeyboardMarkup(buttons)
@@ -255,21 +259,46 @@ def select_building(update, context):
     return SELECT_BUILDING
 
 
-def select_building2(update, context):
-    text = 'Choose a building:'
-    buttons = [[
-        InlineKeyboardButton(text='COMS1', callback_data='COMS1_check-in'),
-        InlineKeyboardButton(text='COMS2', callback_data='COMS2_check-in')
-    ],
-        [
-            InlineKeyboardButton(text='Back', callback_data=str(END))
-        ]]
+def select_building_checkin(update, context):
+    if update.callback_query.data == "end_checkin":
+        return select_building(update, context)
+    else:
+        text = 'Choose a building:'
+        buttons = [[
+            InlineKeyboardButton(text='COMS1', callback_data='COMS1_check-in'),
+            InlineKeyboardButton(text='COMS2', callback_data='COMS2_check-in')],
+
+            [InlineKeyboardButton(text='Back', callback_data='end_checkin')]]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
+        return SELECT_CHECKIN_BUILDING
+
+
+def createTimeButtons():
+    buttons = [
+        [InlineKeyboardButton(text='8am', callback_data='8')],
+        [InlineKeyboardButton(text='9am', callback_data='9')],
+        [InlineKeyboardButton(text='10am', callback_data='10')],
+        [InlineKeyboardButton(text='11am', callback_data='11')],
+        [InlineKeyboardButton(text='12pm', callback_data='12')],
+        [InlineKeyboardButton(text='1pm', callback_data='13')],
+        [InlineKeyboardButton(text='2pm', callback_data='14')],
+        [InlineKeyboardButton(text='3pm', callback_data='15')],
+        [InlineKeyboardButton(text='4pm', callback_data='16')],
+        [InlineKeyboardButton(text='5pm', callback_data='17')],
+        [InlineKeyboardButton(text='6pm', callback_data='18')],
+        [InlineKeyboardButton(text='7pm', callback_data='19')],
+        [InlineKeyboardButton(text='8pm', callback_data='20')],
+        [InlineKeyboardButton(text='9pm', callback_data='21')],
+        [InlineKeyboardButton(text='10pm', callback_data='22')],
+        [InlineKeyboardButton(text='11pm', callback_data='23')]]
+
     keyboard = InlineKeyboardMarkup(buttons)
 
-    update.callback_query.answer()
-    update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-
-    return SELECT_BUILDING
+    return keyboard
 
 
 def select_level(update, context):
@@ -277,56 +306,8 @@ def select_level(update, context):
 
     text = 'Choose your level: '
 
-    if update.callback_query.data == 'COMS1':
-        buttons = [[
-            InlineKeyboardButton(text='Level B1', callback_data='LevelB1'),
-            InlineKeyboardButton(text='Level 1', callback_data='Level1')
-        ], [
-            InlineKeyboardButton(text='Level 2', callback_data='Level2'),
-            InlineKeyboardButton(text='Back', callback_data=str(END))
-        ]]
+    if update.callback_query.data == 'checkout':
 
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        update.callback_query.answer()
-        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-
-        return SELECTING_LEVEL
-
-    elif update.callback_query.data == 'COMS1_check-in':
-        buttons = [[
-            InlineKeyboardButton(text='Level B1', callback_data='LevelB1_check-in'),
-            InlineKeyboardButton(text='Level 1', callback_data='Level1_check-in')
-        ], [
-            InlineKeyboardButton(text='Level 2', callback_data='Level2_check-in'),
-            InlineKeyboardButton(text='Back', callback_data=str(END))
-        ]]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        update.callback_query.answer()
-        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-        return SELECTING_LEVEL2
-
-    elif update.callback_query.data == 'COMS2_check-in':
-        buttons = [[
-            InlineKeyboardButton(text='Level 1', callback_data='Level1_check-in'),
-            InlineKeyboardButton(text='Level 2', callback_data='Level2_check-in'),
-        ], [
-            InlineKeyboardButton(text='Level 3', callback_data='Level3_check-in'),
-            InlineKeyboardButton(text='Level 4', callback_data='Level4_check-in')],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        update.callback_query.answer()
-        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-        return SELECTING_LEVEL2
-
-    elif update.callback_query.data == 'checkin':
-        return SELECT_BUILDING2
-
-    elif update.callback_query.data == 'checkout':
         buttons = [];
 
         cur.execute("SELECT DISTINCT room_no FROM studentsavers.rooms WHERE username = %s",
@@ -342,6 +323,7 @@ def select_level(update, context):
                 buttons.append([InlineKeyboardButton(text=str(rooms), callback_data=rooms)])
                 keyboard = InlineKeyboardMarkup(buttons)
                 update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
         else:
             text = 'No rooms to check out from'
             update.callback_query.edit_message_text(text=text)
@@ -349,14 +331,30 @@ def select_level(update, context):
         return CHECK_OUT
 
     else:
-        text += '\n' + " (Data for official lesson is only available for level 1)"
-        buttons = [[
-            InlineKeyboardButton(text='Level 1', callback_data='Level1'),
-            InlineKeyboardButton(text='Level 2', callback_data='Level2'),
-        ], [
-            InlineKeyboardButton(text='Level 3', callback_data='Level3'),
-            InlineKeyboardButton(text='Level 4', callback_data='Level4')],
-        ]
+
+        print("line 317")
+        print(update.callback_query.data)
+
+        if update.callback_query.data == 'COMS1':
+            buttons = [[
+                InlineKeyboardButton(text='Level B1', callback_data='level_B1'),
+                InlineKeyboardButton(text='Level 1', callback_data='level_1')
+            ], [
+                InlineKeyboardButton(text='Level 2', callback_data='level_2'),
+                InlineKeyboardButton(text='Back', callback_data='end_levels')
+            ]]
+
+        else:
+            text += '\n' + " (Data for official lesson is only available for level 1)"
+            print("line 331 level 2 clicked")
+            buttons = [[
+                InlineKeyboardButton(text='Level 1', callback_data='level_1'),
+                InlineKeyboardButton(text='Level 2', callback_data='level_2'),
+            ], [
+                InlineKeyboardButton(text='Level 3', callback_data='level_3'),
+                InlineKeyboardButton(text='Level 4', callback_data='level_4')],
+                [InlineKeyboardButton(text='Back', callback_data='end_levels')]]
+
         keyboard = InlineKeyboardMarkup(buttons)
 
         update.callback_query.answer()
@@ -364,68 +362,220 @@ def select_level(update, context):
         return SELECTING_LEVEL
 
 
-# used for check-in
-def show_all_level(update, context):
-    context.chat_data['level'] = update.callback_query.data
-    print(update.callback_query.data)
-    buttons = []
+def select_level_checkin(update, context):
+    context.chat_data["building"] = update.callback_query.data.split("_")[0]
 
-    if context.chat_data["building"] == "COMS1_check-in":
-
-        all_rooms_coms1 = roomSearch.com1_data(str(update.callback_query.data).split('_')[0])
-        text = 'Choose a room to check into: '
-
-        for room in all_rooms_coms1:
-            buttons.append([InlineKeyboardButton(text=str(room), callback_data=room)])
-            keyboard = InlineKeyboardMarkup(buttons)
-            update.callback_query.answer()
-            update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    if update.callback_query.data == "end_checkin":
+        return select_building_checkin(update, context)
 
     else:
-        all_rooms_coms2 = roomSearch.com2_data(str(update.callback_query.data).split('_')[0])
-        text = 'Choose a room to check into: '
+        text = 'Choose your level: '
 
-        for room in all_rooms_coms2:
-            buttons.append([InlineKeyboardButton(text=str(room), callback_data=room)])
+        if update.callback_query.data == 'COMS1_check-in':
+
+            buttons = [[
+                InlineKeyboardButton(text='Level B1', callback_data='B1_check-in'),
+                InlineKeyboardButton(text='Level 1', callback_data='1_check-in')
+            ], [
+                InlineKeyboardButton(text='Level 2', callback_data='2_check-in'),
+                InlineKeyboardButton(text='Back', callback_data='end_checkin2')
+            ]]
+
+        else:
+            buttons = [[
+                InlineKeyboardButton(text='Level 1', callback_data='1_check-in'),
+                InlineKeyboardButton(text='Level 2', callback_data='2_check-in')],
+
+                [InlineKeyboardButton(text='Level 3', callback_data='3_check-in'),
+                 InlineKeyboardButton(text='Level 4', callback_data='4_check-in')],
+
+                [InlineKeyboardButton(text='Back', callback_data='end_checkin2')]]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
+        return SELECTING_ROOM
+
+
+def choose_start_time(update, context):
+    print("line 385")
+    print(update.callback_query.data)
+    clicked_check_in_option = update.callback_query.data[0:3] == "COM"
+
+    if update.callback_query.data == "end_levels":
+
+        return select_building(update, context)
+
+    else:
+        if update.callback_query.data != "edit":
+            context.chat_data["level"] = update.callback_query.data
+        elif clicked_check_in_option:
+            context.chat_data["chosen_room"] = update.callback_query.data
+
+        text = "Please select the time." + "\n" + " From: "
+
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(text=text, reply_markup=createTimeButtons())
+
+        return SELECT_START_TIME
+
+
+def choose_checkin_start_time(update, context):
+    if update.callback_query.data != "edit":
+        context.chat_data["level"] = update.callback_query.data
+
+    context.chat_data["chosen_room"] = update.callback_query.data
+
+    text = "Please select the time." + "\n" + " From: "
+
+    update.callback_query.answer()
+    update.callback_query.edit_message_text(text=text, reply_markup=createTimeButtons())
+
+    return SELECT_START_TIME
+
+
+def choose_end_time(update, context):
+    context.chat_data["callback_avail_start_time"] = update.callback_query.data
+
+    text = "Please select the time." + "\n" + "From: " + roomSearch.convert_time_to_12hr(
+        update.callback_query.data) + "\n " + "To: "
+
+    currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+    context.chat_data["avail_start_time"] = datetime.datetime(int(currentDate.strftime("%Y")),
+                                                              int(currentDate.strftime("%m")),
+                                                              int(currentDate.strftime("%d")),
+                                                              int(update.callback_query.data), 0, 0)
+
+    update.callback_query.answer()
+    update.callback_query.edit_message_text(text=text, reply_markup=createTimeButtons())
+
+    return SELECT_END_TIME
+
+
+def confirm_timing(update, context):
+    currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+
+    context.chat_data["avail_end_time"] = update.callback_query.data
+    context.chat_data["callback_avail_end_time"] = datetime.datetime(int(currentDate.strftime("%Y")),
+                                                                     int(currentDate.strftime("%m")),
+                                                                     int(currentDate.strftime("%d")),
+                                                                     int(update.callback_query.data), 0, 0)
+
+    if int(context.chat_data["callback_avail_start_time"]) < int(update.callback_query.data):
+
+        text = "Searching for room in " + context.chat_data["level"].replace('_', ' ') + " of " + context.chat_data[
+            "building"] + "\n" + \
+               "From: " + roomSearch.convert_time_to_12hr(
+            context.chat_data["callback_avail_start_time"]) + "\n " + "To: " \
+               + roomSearch.convert_time_to_12hr(update.callback_query.data);
+
+        buttons = [[
+            InlineKeyboardButton(text='Edit', callback_data='edit'),
+            InlineKeyboardButton(text='Done', callback_data='continue'),
+        ]]
+
+    else:
+
+        if int(context.chat_data["callback_avail_start_time"]) == int(update.callback_query.data):
+
+            text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
+                context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
+                update.callback_query.data) + ")" + "\n " + "Selected start time cannot be the same as selected end time." \
+                   + "\n" + "Do click edit, to change the timeframe."
+
+        else:
+
+            text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
+                context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
+                update.callback_query.data) + ")" + "\n " + "Selected start time cannot be more than selected end time." \
+                   + "\n" + "Do click edit, to change the timeframe."
+
+        buttons = [[
+            InlineKeyboardButton(text='Edit', callback_data='edit'),
+        ]]
+
+    keyboard2 = InlineKeyboardMarkup(buttons)
+    update.callback_query.answer()
+    update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
+
+    return SELECT_OPTIONS_FOR_TIMING
+
+
+def confirm_timing2(update, context):
+    currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+
+    context.chat_data["avail_end_time"] = update.callback_query.data
+    context.chat_data["callback_avail_end_time"] = datetime.datetime(int(currentDate.strftime("%Y")),
+                                                                     int(currentDate.strftime("%m")),
+                                                                     int(currentDate.strftime("%d")),
+                                                                     int(update.callback_query.data), 0, 0)
+
+    if int(context.chat_data["callback_avail_start_time"]) < int(update.callback_query.data):
+
+        text = "Checking into " + context.chat_data["chosen_room"] + "\n" + "From: " + \
+               roomSearch.convert_time_to_12hr(context.chat_data["callback_avail_start_time"]) \
+               + "\n" + "To: " + roomSearch.convert_time_to_12hr(update.callback_query.data);
+
+        buttons = [[
+            InlineKeyboardButton(text='Edit', callback_data='edit'),
+            InlineKeyboardButton(text='Done', callback_data='continue'),
+        ]]
+
+        keyboard2 = InlineKeyboardMarkup(buttons)
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
+
+    else:
+
+        text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
+            context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
+            update.callback_query.data) + ")" + "\n" + "Selected start time cannot be more than selected end time." \
+               + "\n" + "Do click edit, to change the timeframe."
+
+        buttons = [[
+            InlineKeyboardButton(text='Edit', callback_data='edit'),
+        ]]
+
+        keyboard2 = InlineKeyboardMarkup(buttons)
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
+
+    return SELECT_OPTIONS_FOR_TIMING2
+
+
+# used for check-in
+def show_all_level(update, context):
+    if update.callback_query.data == "end_checkin2":
+        return select_building_checkin(update, context)
+    else:
+        context.chat_data['level'] = update.callback_query.data
+        buttons = []
+
+        if context.chat_data["building"] == "COMS1":
+
+            rooms_coms1 = roomSearch.all_rooms_com1("level " + str(update.callback_query.data).split('_')[0])
+            text = 'Choose a room to check into: '
+
+            for room in rooms_coms1:
+                buttons.append([InlineKeyboardButton(text=str(room), callback_data=room)])
+
             keyboard = InlineKeyboardMarkup(buttons)
             update.callback_query.answer()
             update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    return FINISH_SELECTING_LEVEL2
+        else:
+            rooms_coms2 = roomSearch.all_rooms_com2("level " + str(update.callback_query.data).split('_')[0])
+            text = 'Choose a room to check into: '
 
+            for room in rooms_coms2:
+                buttons.append([InlineKeyboardButton(text=str(room), callback_data=room)])
+                keyboard = InlineKeyboardMarkup(buttons)
+                update.callback_query.answer()
+                update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-def finsh_selecting_level2(update, context):
-    context.chat_data['chosen_room'] = update.callback_query.data
-
-    text = 'Please enter time to check in in the following way:  HH:MM format to HH:MM format.'
-
-    update.callback_query.answer()
-    update.callback_query.edit_message_text(text=text)
-
-    return CHECK_IN_TIME
-
-
-def save_input_checkin(update, context):
-    message = update.message.text.replace("to", " ")
-    context.chat_data['start_time'] = datetime.datetime.strptime(message.split()[0], '%H:%M').time()
-    context.chat_data['end_time'] = datetime.datetime.strptime(message.split()[1], '%H:%M').time()
-
-    return confirm_time_checkin(update, context)
-
-
-def confirm_time_checkin(update, context):
-    text = 'Got it! Do click on the respective buttons to move on.'
-
-    buttons = [[
-        InlineKeyboardButton(text='Edit', callback_data='TIME'),
-        InlineKeyboardButton(text='Done', callback_data=str(END)),
-    ]]
-
-    keyboard2 = InlineKeyboardMarkup(buttons)
-
-    update.message.reply_text(text=text, reply_markup=keyboard2)
-
-    return SUCCESSFUL_CHECK_IN
+        return FINISH_SELECTING_LEVEL2
 
 
 def check_out_service(update, context):
@@ -447,7 +597,7 @@ def check_out_service(update, context):
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    return CHOOSE_CHECK_OUT_TIME
+    choose_check_out_time(update, context)
 
 
 def choose_check_out_time(update, context):
@@ -464,41 +614,18 @@ def choose_check_out_time(update, context):
     text = "You have successfully check out."
 
     buttons = [[
-        InlineKeyboardButton(text='Edit', callback_data='TIME'),
-        InlineKeyboardButton(text='Done', callback_data=str(END)),
+        InlineKeyboardButton(text='Done', callback_data=str(END))
     ]]
 
     keyboard2 = InlineKeyboardMarkup(buttons)
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
 
 
-def end_second_level(update, context):
+def end_choose_action(update, context):
     """Return to top level conversation."""
     start(update, context)
 
     return END
-
-
-def ask_for_input(update, context):
-    """Prompt user to input data for selected feature."""
-    text = 'Please enter time in the following way:  HH:MM format to HH:MM format.'
-
-    context.chat_data['level'] = update.callback_query.data
-
-    update.callback_query.answer()
-    update.callback_query.edit_message_text(text=text)
-
-    return TYPING
-
-
-def save_input(update, context):
-    """Save input for time """
-
-    message = update.message.text.replace("to", " ")
-    context.chat_data['start_time'] = datetime.datetime.strptime(message.split()[0], '%H:%M').time()
-    context.chat_data['end_time'] = datetime.datetime.strptime(message.split()[1], '%H:%M').time()
-
-    return confirm_time(update, context)
 
 
 def confirm_time(update, context):
@@ -513,15 +640,16 @@ def confirm_time(update, context):
 
     update.message.reply_text(text=text, reply_markup=keyboard2)
 
-    return SAVE_TIMING
+    return SELECT_OPTIONS_FOR_TIMING
 
 
 def check_in_successfully(update, context):
+    print("here herehe")
     builing_text = str(context.chat_data['building']).split("_")[0]
     level_text = context.chat_data['level']
     room_no_text = context.chat_data['chosen_room']
-    start_time_text = context.chat_data['start_time'].strftime("%H%M")
-    end_time_text = context.chat_data['end_time'].strftime("%H%M")
+    start_time_text = context.chat_data['callback_avail_start_time']
+    end_time_text = context.chat_data['callback_avail_end_time'].strftime("%H")
 
     date_text = context.chat_data['date'].strftime("%Y-%m-%d")
     username_text = context.chat_data["tele-username"]
@@ -536,7 +664,8 @@ def check_in_successfully(update, context):
     con.commit()
 
     text = 'You have successfully check in to ' + room_no_text \
-           + ' from ' + start_time_text + ' to ' + end_time_text
+           + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
+           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text)
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
@@ -564,8 +693,8 @@ def checking_in(update, context):
     builing_text = context.chat_data['building']
     level_text = context.chat_data['level']
     room_no_text = context.chat_data['chosen_room']
-    start_time_text = context.chat_data['start_time'].strftime("%H%M")
-    end_time_text = context.chat_data['end_time'].strftime("%H%M")
+    start_time_text = context.chat_data['avail_start_time'].strftime("%H%M")
+    end_time_text = context.chat_data['callback_avail_end_time'].strftime("%H%M")
 
     date_text = context.chat_data['date'].strftime("%Y-%m-%d")
 
@@ -582,19 +711,8 @@ def checking_in(update, context):
     text2 = 'You have successfully check in to ' + room_no_text \
             + ' from ' + start_time_text + ' to ' + end_time_text
 
-    buttons = [[
-        InlineKeyboardButton(text='Done')
-    ]]
+    update.callback_query.edit_message_text(text=text2)
 
-    keyboard = InlineKeyboardMarkup(buttons)
-    update.callback_query.edit_message_text(text=text2, reply_markup=keyboard)
-
-
-def stop_nested(update, context):
-    """Completely end conversation from within nested conversation."""
-    update.message.reply_text('Hope to see you again!.')
-
-    return STOPPING
 
 
 
@@ -804,55 +922,159 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    checking_in_convo = ConversationHandler(
-        entry_points=[CallbackQueryHandler(show_data)],
+    selection_handlers3 = [
+        CallbackQueryHandler(choose_start_time, pattern='^' + 'edit' + '$'),
+        CallbackQueryHandler(check_in_successfully, pattern='^' + 'continue' + '$')
+    ]
+
+    checking_in_convo2 = ConversationHandler(
+
+        entry_points=[CallbackQueryHandler(choose_checkin_start_time)],
 
         states={
-            SHOWING: [CallbackQueryHandler(select_available_room)],
-            SELECTED_ROOM: [CallbackQueryHandler(checking_in)]
+
+            SELECT_START_TIME: [CallbackQueryHandler(choose_end_time,
+                                                     pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
+                                                             '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'
+                                                     .format('8',
+                                                             '9',
+                                                             '10',
+                                                             '11',
+                                                             '12',
+                                                             '13',
+                                                             '14',
+                                                             '15',
+                                                             '16',
+                                                             '17',
+                                                             '18',
+                                                             '19',
+                                                             '20',
+                                                             '21',
+                                                             '22',
+                                                             '23'))],
+
+            SELECT_END_TIME: [CallbackQueryHandler(confirm_timing2,
+                                                   pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
+                                                           '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'.format(
+                                                       '8',
+                                                       '9',
+                                                       '10',
+                                                       '11',
+                                                       '12',
+                                                       '13',
+                                                       '14',
+                                                       '15',
+                                                       '16',
+                                                       '17',
+                                                       '18',
+                                                       '19',
+                                                       '20',
+                                                       '21',
+                                                       '22',
+                                                       '23'))],
+
+            SELECT_OPTIONS_FOR_TIMING2: selection_handlers3,
+            SUCCESSFUL_CHECK_IN: [CallbackQueryHandler(check_in_successfully)]
+
         },
 
         fallbacks=[
             CallbackQueryHandler(checking_in),
             CommandHandler('stop', stop_nested)
-        ],
-
-        map_to_parent={
-            # Return to second level menu
-            # END:,
-            # End conversation alltogether
-            STOPPING: STOPPING,
-        }
+        ]
     )
+    selection_handlers2 = [
+        CallbackQueryHandler(show_data, pattern='^' + 'continue' + '$'),
+        CallbackQueryHandler(choose_start_time, pattern='^' + 'edit' + '$'),
+
+    ]
+
+    select_building_option_handler = [
+        CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$'.format('COMS1',
+                                                                                    'COMS2',
+                                                                                    'COMS1',
+                                                                                    'checkout',
+                                                                                    )),
+        CallbackQueryHandler(select_building_checkin, pattern='^{0}$|^{1}$'.format('checkin', 'end_checkin'))]
 
     # Set up third level ConversationHandler (collecting features)
     input_time_convo = ConversationHandler(
-        entry_points=[CallbackQueryHandler(ask_for_input,
-                                           pattern='^{0}$|^{1}$|^{2}$|^${3}|^${4}|$'
-                                           .format('LevelB1',
-                                                   'Level1',
-                                                   'Level2',
-                                                   'Level3',
-                                                   'Level4'
-                                                   ))],
+        entry_points=[CallbackQueryHandler(choose_start_time,
+                                           pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$'
+                                           .format('end_levels',
+                                                   'level_B1',
+                                                   'level_1',
+                                                   'level_2',
+                                                   'level_3',
+                                                   'level_4'))],
 
         states={
-            TYPING: [MessageHandler(Filters.text, save_input)],
-            SAVE_TIMING: [checking_in_convo]
+
+            SELECT_BUILDING: select_building_option_handler,
+            SELECT_START_TIME: [CallbackQueryHandler(choose_end_time,
+                                                     pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
+                                                             '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'
+                                                     .format('8',
+                                                             '9',
+                                                             '10',
+                                                             '11',
+                                                             '12',
+                                                             '13',
+                                                             '14',
+                                                             '15',
+                                                             '16',
+                                                             '17',
+                                                             '18',
+                                                             '19',
+                                                             '20',
+                                                             '21',
+                                                             '22',
+                                                             '23'))],
+
+            SELECT_END_TIME: [CallbackQueryHandler(confirm_timing,
+                                                   pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
+                                                           '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'.format(
+                                                       '8',
+                                                       '9',
+                                                       '10',
+                                                       '11',
+                                                       '12',
+                                                       '13',
+                                                       '14',
+                                                       '15',
+                                                       '16',
+                                                       '17',
+                                                       '18',
+                                                       '19',
+                                                       '20',
+                                                       '21',
+                                                       '22',
+                                                       '23'))],
+            SHOWING: [CallbackQueryHandler(select_available_room, pattern='^' + 'avail_room_check-in' + '$')],
+            SELECT_OPTIONS_FOR_TIMING: selection_handlers2,
+            SELECTED_ROOM: [CallbackQueryHandler(checking_in)]
+
         },
 
         fallbacks=[
-            CallbackQueryHandler(show_data),
             CommandHandler('stop', stop_nested)
         ],
 
         map_to_parent={
             # Return to second level menu
+
             # End conversation alltogether
             STOPPING: STOPPING,
         }
     )
 
+    select_building_option_handler = [
+        CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$'.format('COMS1',
+                                                                                    'COMS2',
+                                                                                    'COMS1',
+                                                                                    'checkout',
+                                                                                    )),
+        CallbackQueryHandler(select_building_checkin, pattern='^{0}$|^{1}$'.format('checkin', 'end_checkin'))]
 
     # Set up second level ConversationHandler (selecting building)
     choose_building_convo = ConversationHandler(
@@ -860,25 +1082,43 @@ def main():
                                            pattern='^' + str(ROOM_SEARCHING) + '$')],
 
         states={
-            SELECT_BUILDING: [CallbackQueryHandler(select_level,
-                                                   pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$'.format('COMS1',
-                                                                                                        'COMS2',
-                                                                                                        'checkin',
-                                                                                                        'checkout',
-                                                                                                        'COMS1_check-in',
-                                                                                                        'COMS2_check-in'
-                                                                                                        ))],
-            SELECTING_LEVEL: [input_time_convo]
+            SELECT_BUILDING: select_building_option_handler,
 
+            SELECT_CHECKIN_BUILDING: [CallbackQueryHandler(select_level_checkin,
+                                                           pattern='^{0}$|^{1}$|^{2}$'.format('COMS1_check-in',
+                                                                                              'COMS2_check-in',
+                                                                                              'end_checkin'))],
+
+            SELECTING_LEVEL: [input_time_convo],
+            SELECTING_ROOM: [CallbackQueryHandler(show_all_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$'
+                                                  .format('B1_check-in',
+                                                          '1_check-in',
+                                                          '2_check-in',
+                                                          '3_check-in',
+                                                          '4_check-in',
+                                                          'end_checkin2'
+                                                          ))],
+
+            FINISH_SELECTING_LEVEL2: [checking_in_convo2],
+
+            CHECK_OUT: [CallbackQueryHandler(check_out_service)],
         },
 
         fallbacks=[
-            CallbackQueryHandler(end_second_level, pattern='^{0}$'.format('back_to_main_menu')),
+
+            CallbackQueryHandler(end_choose_action, pattern='^' + 'end_select_action' + '$'),
+
             CommandHandler('stop', stop_nested)
         ],
 
         map_to_parent={
-            END: SELECTING_ACTION
+            # After showing data return to top level menu
+            END_SELECT_LEVEL: SELECTING_ACTION,
+            SHOWING: SHOWING,
+            # Return to top level menu
+            END: SELECTING_ACTION,
+            # End conversation alltogether
+            STOPPING: END,
         }
     )
 
