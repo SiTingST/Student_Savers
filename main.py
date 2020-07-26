@@ -72,7 +72,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-TOKEN = "1278045157:AAFjUYhhg50425eKh6cTKpF9APpzwjOdYiU"
+TOKEN = "1325034361:AAGbJJF_NgzXO5BIPzkjQT0XqKS9W8XU-4M"
 
 # DB connection
 con = psycopg2.connect(user="dzwnjonhbsmqyu",
@@ -104,6 +104,24 @@ def start(update, context):
 
     return SELECTING_ACTION
 
+def start2(update, context):
+    text = 'Hi, welcome to Studentsavers bot. Glad to have you here. What do you want to do? Room Searching is only ' \
+           'available for SoC buildings. To abort, simply type /stop.'
+    buttons = [[
+        InlineKeyboardButton(text='Reminder System', callback_data=str(EVENT_HANDLING)),
+        InlineKeyboardButton(text='Room Searching', callback_data=str(ROOM_SEARCHING))
+    ]]
+
+    context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+    context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
+
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
+    logger.info('/start command triggered')
+
+    return SELECTING_ACTION
 
 def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
@@ -243,6 +261,8 @@ def end_second_level(update, context):
     return END
 # Second level conversation callbacks
 def select_building(update, context):
+
+    print("selected_building")
     text = 'Choose your action:'
 
     buttons = [[
@@ -265,6 +285,10 @@ def select_building(update, context):
 
 
 def select_building_checkin(update, context):
+
+    print("line 289 selected check in")
+    print(update.callback_query.data)
+
     if update.callback_query.data == "end_checkin":
         return select_building(update, context)
     else:
@@ -368,6 +392,9 @@ def select_level(update, context):
 
 
 def select_level_checkin(update, context):
+
+    print("line 394")
+    print(update.callback_query.data)
     context.chat_data["building"] = update.callback_query.data.split("_")[0]
 
     if update.callback_query.data == "end_checkin":
@@ -411,7 +438,6 @@ def choose_start_time(update, context):
     clicked_check_in_option = update.callback_query.data[0:3] == "COM"
 
     if update.callback_query.data == "end_levels":
-
         return select_building(update, context)
 
     else:
@@ -630,7 +656,7 @@ def choose_check_out_time(update, context):
 
 def end_choose_action(update, context):
     """Return to top level conversation."""
-    start(update, context)
+    start2(update, context)
 
     return END
 
@@ -1002,9 +1028,8 @@ def main():
     ]
 
     select_building_option_handler = [
-        CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$'.format('COMS1',
+        CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$'.format('COMS1',
                                                                                     'COMS2',
-                                                                                    'COMS1',
                                                                                     'checkout',
                                                                                     )),
         CallbackQueryHandler(select_building_checkin, pattern='^{0}$|^{1}$'.format('checkin', 'end_checkin'))]
@@ -1012,17 +1037,23 @@ def main():
     # Set up third level ConversationHandler (collecting features)
     input_time_convo = ConversationHandler(
         entry_points=[CallbackQueryHandler(choose_start_time,
-                                           pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$'
+                                           pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$'
                                            .format('end_levels',
                                                    'level_B1',
                                                    'level_1',
                                                    'level_2',
                                                    'level_3',
-                                                   'level_4'))],
+                                                   'level_4',
+                                                   'end_checkin',
+                                                   'end_checkin2'))],
 
         states={
 
             SELECT_BUILDING: select_building_option_handler,
+            SELECT_CHECKIN_BUILDING: [CallbackQueryHandler(select_level_checkin,
+                                                           pattern='^{0}$|^{1}$|^{2}$'.format('COMS1_check-in',
+                                                                                              'COMS2_check-in',
+                                                                                              'end_checkin'))],
             SELECT_START_TIME: [CallbackQueryHandler(choose_end_time,
                                                      pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
                                                              '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'
@@ -1081,11 +1112,11 @@ def main():
     )
 
     select_building_option_handler = [
-        CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$'.format('COMS1',
+        CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$'.format('COMS1',
                                                                                     'COMS2',
-                                                                                    'COMS1',
                                                                                     'checkout',
                                                                                     )),
+
         CallbackQueryHandler(select_building_checkin, pattern='^{0}$|^{1}$'.format('checkin', 'end_checkin'))]
 
     # Set up second level ConversationHandler (selecting building)
@@ -1102,13 +1133,14 @@ def main():
                                                                                               'end_checkin'))],
 
             SELECTING_LEVEL: [input_time_convo],
-            SELECTING_ROOM: [CallbackQueryHandler(show_all_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$'
+            SELECTING_ROOM: [CallbackQueryHandler(show_all_level, pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$'
                                                   .format('B1_check-in',
                                                           '1_check-in',
                                                           '2_check-in',
                                                           '3_check-in',
                                                           '4_check-in',
-                                                          'end_checkin2'
+                                                          'end_checkin2',
+                                                          'end_levels'
                                                           ))],
 
             FINISH_SELECTING_LEVEL2: [checking_in_convo2],
@@ -1214,9 +1246,8 @@ def main():
 
     # log all errors
     dp.add_error_handler(error)
-
     # Start the Bot
-    # updater.start_polling()
+    updater.start_polling()
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TOKEN)
