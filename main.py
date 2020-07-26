@@ -72,7 +72,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-TOKEN = "1325034361:AAGbJJF_NgzXO5BIPzkjQT0XqKS9W8XU-4M"
+TOKEN = "1278045157:AAFjUYhhg50425eKh6cTKpF9APpzwjOdYiU"
 
 # DB connection
 con = psycopg2.connect(user="dzwnjonhbsmqyu",
