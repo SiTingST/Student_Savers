@@ -621,7 +621,7 @@ def show_all_level(update, context):
             print("hello woeld")
             print(str(update.callback_query.data).split('_')[0])
 
-            rooms_coms1 = roomSearch.all_rooms_com1("level " + str(update.callback_query.data).split('_')[0])
+            rooms_coms1 = roomSearch.checkin_all_rooms_com1("level " + str(update.callback_query.data).split('_')[0])
             text = 'Choose a room to check into: '
 
             for room in rooms_coms1:
@@ -632,7 +632,7 @@ def show_all_level(update, context):
             update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
         else:
-            rooms_coms2 = roomSearch.all_rooms_com2("level " + str(update.callback_query.data).split('_')[0])
+            rooms_coms2 = roomSearch.checkin_all_rooms_com2("level " + str(update.callback_query.data).split('_')[0])
             text = 'Choose a room to check into: '
 
             for room in rooms_coms2:
@@ -981,7 +981,7 @@ def confirm_add_to_calendar(update, context):
 
 def help(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    update.message.reply_text('If the bot is stuck, type /stop and /start to restart the bot.')
 
 
 # Error handler
