@@ -651,9 +651,14 @@ def check_out_service(update, context):
     time_result = cur.fetchall()
 
     buttons = [];
+
     for timing in time_result:
+        print(timing)
+        print(roomSearch.convert_time_to_12hr2(timing))
+
         timing = ('').join(('-'.join(map(str, timing)).split('),')))
-        buttons.append([InlineKeyboardButton(text=roomSearch.convert_time_to_12hr2(timing), callback_data=timing)])
+        print()
+        buttons.append([InlineKeyboardButton(text=timing, callback_data=timing)])
 
     keyboard = InlineKeyboardMarkup(buttons)
 
