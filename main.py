@@ -372,7 +372,7 @@ def select_level(update, context):
             ]]
 
         else:
-           
+
             buttons = [[
                 InlineKeyboardButton(text='Level 1', callback_data='level_1'),
                 InlineKeyboardButton(text='Level 2', callback_data='level_2'),
@@ -634,15 +634,20 @@ def check_out_service(update, context):
 def choose_check_out_time(update, context):
     date_text = context.chat_data['date'].strftime("%Y-%m-%d")
 
+    print("checkout")
+    print(str(update.callback_query.data).split('-')[0])
+    print(str(update.callback_query.data).split('-')[1])
+
     cur.execute(
-        "DELETE FROM studentsavers.rooms WHERE room_no = %s AND start_time = %s AND end_time = %s AND date =%s AND username = %s",
+        "DELETE FROM studentsavers.rooms WHERE room_no = %s AND start_time = %s AND end_time = %s AND date =%s "
+        "AND username = %s",
         [context.chat_data["checkout_room"], str(update.callback_query.data).split('-')[0],
          str(update.callback_query.data).split('-')[1],
          date_text, context.chat_data["tele-username"]])
 
     con.commit()
 
-    text = "You have successfully check out." + "\n type /stop and /start to restart the bot."
+    text = "You have successfully check out." + "\n Type /stop and /start to restart the bot."
 
     update.callback_query.edit_message_text(text=text)
 
