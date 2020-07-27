@@ -93,6 +93,7 @@ def start(update, context):
     ]]
     context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
     context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
+
     context.chat_data["tele-username"] = update.message.from_user.username
 
     keyboard = InlineKeyboardMarkup(buttons)
@@ -305,8 +306,6 @@ def select_building(update, context):
 
 
 def select_building_checkin(update, context):
-    print("line 289 selected check in")
-    context.chat_data["tele-username"] = update.message.from_user.username
 
     print(update.callback_query.data)
 
