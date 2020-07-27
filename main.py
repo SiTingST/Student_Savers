@@ -36,18 +36,17 @@ SELECTED_ROOM = map(chr, range(17, 18))
 # Meta states
 STOPPING, SHOWING = map(chr, range(19, 21))
 END_SELECT_LEVEL = map(chr, range(21, 22))
-SUCCESSFULCHECK_IN_AFTER_SEARCH =  map(chr, range(22, 23))
 
 # States for Event Handling
-EVENT_DETAILS = map(chr, range(23, 24))
-EVENT_DATE = map(chr, range(24, 25))
-TIMER = map(chr, range(25, 26))
-EVENT_DATE = map(chr, range(26, 27))
-EMAIL = map(chr, range(27, 28))
-CALENDAR = map(chr, range(28, 29))
-CONFIRM_ADD_CAL = map(chr, range(29, 30))
-EVENT_TIME = map(chr, range(31, 32))
-HANDLING_EVENT2 = map(chr, range(32, 33))
+EVENT_DETAILS = map(chr, range(22, 23))
+EVENT_DATE = map(chr, range(23, 24))
+TIMER = map(chr, range(24, 25))
+EVENT_DATE = map(chr, range(25, 26))
+EMAIL = map(chr, range(26, 27))
+CALENDAR = map(chr, range(27, 28))
+CONFIRM_ADD_CAL = map(chr, range(28, 29))
+EVENT_TIME = map(chr, range(30, 31))
+HANDLING_EVENT2 = map(chr, range(31, 32))
 
 
 
@@ -708,16 +707,11 @@ def check_in_successfully(update, context):
 
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text)
-    buttons = [[
-        InlineKeyboardButton(text='Done', callback_data='checkin_successful')
-    ]]
+           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n type /stop and /start to restart the bot."
 
-    keyboard2 = InlineKeyboardMarkup(buttons)
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text=text,reply_markup=keyboard2)
+    update.callback_query.edit_message_text(text=text)
 
-    return SUCCESSFULCHECK_IN_AFTER_SEARCH
 
 
 def select_available_room(update, context):
@@ -761,21 +755,10 @@ def checking_in(update, context):
 
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text)
-    buttons = [[
-        InlineKeyboardButton(text='Done', callback_data='checkin_successful')
-    ]]
+           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n type /stop and /start to restart the bot"
 
-    keyboard2 = InlineKeyboardMarkup(buttons)
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
-
-    return SUCCESSFULCHECK_IN_AFTER_SEARCH
-
-
-
-
-
+    update.callback_query.edit_message_text(text=text)
 
 # Sending reminders
 
@@ -1035,10 +1018,7 @@ def main():
                                                        '23'))],
 
             SELECT_OPTIONS_FOR_TIMING2: selection_handlers3,
-            SUCCESSFUL_CHECK_IN: [CallbackQueryHandler(check_in_successfully)],
-            SUCCESSFULCHECK_IN_AFTER_SEARCH:[CallbackQueryHandler(end_choose_action,
-                                                                  pattern='^' + 'checkin_successful' + '$')]
-
+            SUCCESSFUL_CHECK_IN: [CallbackQueryHandler(check_in_successfully)]
         },
 
         fallbacks=[
@@ -1120,9 +1100,7 @@ def main():
                                                        '23'))],
             SHOWING: [CallbackQueryHandler(select_available_room, pattern='^' + 'avail_room_check-in' + '$')],
             SELECT_OPTIONS_FOR_TIMING: selection_handlers2,
-            SELECTED_ROOM: [CallbackQueryHandler(checking_in)],
-            SUCCESSFULCHECK_IN_AFTER_SEARCH: [CallbackQueryHandler(end_choose_action,
-                                                                   pattern='^' + 'checkin_successful' + '$')]
+            SELECTED_ROOM: [CallbackQueryHandler(checking_in)]
         },
 
         fallbacks=[
