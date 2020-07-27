@@ -2,7 +2,8 @@ import json
 import logging
 import os
 
-from psycopg2._range import DateTimeRange
+import datetime
+from datetimerange import DateTimeRange
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from telegram import InlineKeyboardMarkup

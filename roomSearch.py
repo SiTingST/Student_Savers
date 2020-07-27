@@ -6,13 +6,13 @@ import pytz as pytz
 # data from nusmod api
 def com1_data(level):
     room_label = [];
-    if level == "level B1":
+    if level == "level_B1":
         room_label = ["COM1-B108", "COM1-B109", "COM1-B110", "COM1-B111", "COM1-B112","COM1-B113", "COM1-VCRM"]
 
-    elif level == "level 1":
+    elif level == "level_1":
         room_label = ["COM1-0120"]
 
-    elif level == "level 2":
+    elif level == "level_2":
         room_label = ["COM1-0201", "COM1-0203", "COM1-0204", "COM1-0206", "COM1-0212", "COM1-0216", "COM1-0217"]
 
     return room_label
@@ -20,7 +20,7 @@ def com1_data(level):
 
 def com2_data(level):
     room_label = [];
-    if level == "level 1":
+    if level == "level_1":
         room_label = ["COM2-0108"]
     return room_label
 
@@ -30,8 +30,8 @@ def return_weekNo(dateNo):
     local_tz = pytz.timezone('Asia/Singapore')
     currentDate = dateNo.replace(tzinfo=pytz.UTC).astimezone(local_tz)
 
-    startOfweek1 = datetime.datetime(2020, 7, 7).replace(tzinfo=pytz.utc).astimezone(local_tz)
-    endOfweek1 = datetime.datetime(2020, 7, 30).replace(tzinfo=pytz.utc).astimezone(local_tz)
+    startOfweek1 = datetime.datetime(2020, 7, 26).replace(tzinfo=pytz.utc).astimezone(local_tz)
+    endOfweek1 = datetime.datetime(2020, 8, 18).replace(tzinfo=pytz.utc).astimezone(local_tz)
 
     startOfweek2 = datetime.datetime(2020, 8, 19).replace(tzinfo=pytz.utc).astimezone(local_tz)
     endOfweek2 = datetime.datetime(2020, 8, 25).replace(tzinfo=pytz.utc).astimezone(local_tz)
@@ -141,18 +141,15 @@ def convert_time_to_12hr(time_in_hour):
 def all_rooms_com1(level):
     room_array = [];
 
-    print(level)
-
     if level == "level B1":
-        room_array = ["COM1-B06", "COM1-B07", "COM1-B102", "COM1-B103", "COM1-B108", "COM1-B109", "COM1-B110",
-                      "COM1-B111", "COM1-B112", "COM1-B113"]
+        room_array = ["COM1-B06", "COM1-B07", "COM1-B102", "COM1-B103"]
 
     elif level == "level 1":
-        room_array = ["COM1-0112", "COM1-0113", "COM1-0114", "COM1-0118", "COM1-0120", "COM1-0122"]
+        room_array = ["COM1-0112", "COM1-0113", "COM1-0114", "COM1-0118", "COM1-0122"]
 
     elif level == "level 2":
-        room_array = ["COM1-0201", "COM1-0203", "COM1-0204", "COM1-0206", "COM1-0207", "COM1-0208", "COM1-0209",
-                      "COM1-0210", "COM1-0212", "COM1-0213", "COM1-0216", "COM1-0217"]
+        room_array = ["COM1-0207", "COM1-0208", "COM1-0209",
+                      "COM1-0210", "COM1-0213", "COM1-0217"]
 
     elif level == "level 3":
         room_array = ["COM1-0319", "COM1-0328"]
