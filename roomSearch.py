@@ -141,17 +141,17 @@ def convert_time_to_12hr(time_in_hour):
 def all_rooms_com1(level):
     room_array = [];
 
-    if level == "level B1":
+    if level == "level_B1":
         room_array = ["COM1-B06", "COM1-B07", "COM1-B102", "COM1-B103"]
 
-    elif level == "level 1":
+    elif level == "level_1":
         room_array = ["COM1-0112", "COM1-0113", "COM1-0114", "COM1-0118", "COM1-0122"]
 
-    elif level == "level 2":
+    elif level == "level_2":
         room_array = ["COM1-0207", "COM1-0208", "COM1-0209",
                       "COM1-0210", "COM1-0213", "COM1-0217"]
 
-    elif level == "level 3":
+    elif level == "level_3":
         room_array = ["COM1-0319", "COM1-0328"]
 
     return room_array
@@ -160,13 +160,13 @@ def all_rooms_com1(level):
 def all_rooms_com2(level):
     print(level)
     room_label = [];
-    if level == "level 1":
+    if level == "level_1":
         room_label = ["COM2-0108"]
-    elif level == "level 2":
+    elif level == "level_2":
         room_label = ["COM2-0212", "COM2-0220", "COM2-0223", "COM2-0224", "COM2-0226"]
-    elif level == "level 3":
+    elif level == "level_3":
         room_label = ["COM2-0314", "COM2-0319", "COM2-0328", "COM2-0330"]
-    elif level == "level 4":
+    elif level == "level_4":
         room_label = ["COM2-0402", "COM2-0406"]
 
     return room_label
