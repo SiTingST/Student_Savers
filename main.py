@@ -353,7 +353,7 @@ def select_level(update, context):
                 update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
         else:
-            text = 'No rooms to check out from'
+            text = 'No rooms to check out from. ' + "\n Type /stop and /start to return to main menu."
             update.callback_query.edit_message_text(text=text)
 
         return CHECK_OUT
