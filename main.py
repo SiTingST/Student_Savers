@@ -654,7 +654,7 @@ def end_choose_action(update, context):
 
 def stop_nested(update, context):
     """Completely end conversation from within nested conversation."""
-    update.message.reply_text('Hope to see you again!.')
+    update.message.reply_text('Hope to see you again!')
 
     return STOPPING
 
