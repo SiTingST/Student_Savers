@@ -714,8 +714,8 @@ def check_in_successfully(update, context):
     builing_text = str(context.chat_data['building']).split("_")[0]
     level_text = context.chat_data['level']
     room_no_text = context.chat_data['chosen_room']
-    start_time_text = context.chat_data['avail_start_time'].strftime("%H%M")
-    end_time_text = context.chat_data['callback_avail_end_time'].strftime("%H%M")
+    start_time_text = context.chat_data['checkin_avail_start_time'].strftime("%H%M")
+    end_time_text = context.chat_data['checkin_callback_avail_end_time'].strftime("%H%M")
 
     date_text = context.chat_data['date'].strftime("%Y-%m-%d")
     username_text = context.chat_data["tele-username"]
