@@ -127,6 +127,7 @@ def start2(update, context):
 def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
+
     http = urllib3.PoolManager()
     json_obj = http.request('GET', url)
     text = json.loads(json_obj.data.decode('UTF-8'))
