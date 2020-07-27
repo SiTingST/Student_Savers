@@ -362,9 +362,6 @@ def select_level(update, context):
 
     else:
 
-        print("line 317")
-        print(update.callback_query.data)
-
         if update.callback_query.data == 'COMS1':
             buttons = [[
                 InlineKeyboardButton(text='Level B1', callback_data='level_B1'),
@@ -375,8 +372,7 @@ def select_level(update, context):
             ]]
 
         else:
-            text += '\n' + " (Data for official lesson is only available for level 1)"
-            print("line 331 level 2 clicked")
+           
             buttons = [[
                 InlineKeyboardButton(text='Level 1', callback_data='level_1'),
                 InlineKeyboardButton(text='Level 2', callback_data='level_2'),
@@ -646,7 +642,7 @@ def choose_check_out_time(update, context):
 
     con.commit()
 
-    text = "You have successfully check out."
+    text = "You have successfully check out." + "\n type /stop and /start to restart the bot."
 
     update.callback_query.edit_message_text(text=text)
 
@@ -940,8 +936,8 @@ def confirm_add_to_calendar(update, context):
 
 
 def help(update, context):
-    """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+
+    update.message.reply_text('If the bot is stuck, do type in /stop and /start to restart it.')
 
 
 # Error handler
