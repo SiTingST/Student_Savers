@@ -1059,7 +1059,13 @@ def main():
         fallbacks=[
             CallbackQueryHandler(checking_in),
             CommandHandler('stop', stop_nested)
-        ]
+        ],
+        map_to_parent={
+            # Return to second level menu
+
+            # End conversation alltogether
+            STOPPING: STOPPING,
+        }
     )
     selection_handlers2 = [
         CallbackQueryHandler(show_data, pattern='^' + 'continue' + '$'),
