@@ -32,7 +32,7 @@ SELECT_OPTIONS_FOR_TIMING = map(chr, range(14, 15))
 SELECT_OPTIONS_FOR_TIMING2 = map(chr, range(15, 16))
 
 SELECTED_ROOM = map(chr, range(17, 18))
-
+CHOOSE_TO_CHECK_OUT = map(chr, range(18, 19))
 # Meta states
 STOPPING, SHOWING = map(chr, range(19, 21))
 END_SELECT_LEVEL = map(chr, range(21, 22))
@@ -631,7 +631,8 @@ def check_out_service(update, context):
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    choose_check_out_time(update, context)
+    return CHOOSE_TO_CHECK_OUT
+
 
 
 def choose_check_out_time(update, context):
@@ -647,12 +648,7 @@ def choose_check_out_time(update, context):
 
     text = "You have successfully check out."
 
-    buttons = [[
-        InlineKeyboardButton(text='Done', callback_data=str(END))
-    ]]
-
-    keyboard2 = InlineKeyboardMarkup(buttons)
-    update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
+    update.callback_query.edit_message_text(text=text)
 
 
 def end_choose_action(update, context):
@@ -1147,6 +1143,7 @@ def main():
             FINISH_SELECTING_LEVEL2: [checking_in_convo2],
 
             CHECK_OUT: [CallbackQueryHandler(check_out_service)],
+            CHOOSE_TO_CHECK_OUT : [CallbackQueryHandler(choose_check_out_time)]
         },
 
         fallbacks=[
