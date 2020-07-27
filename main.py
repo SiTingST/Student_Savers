@@ -91,10 +91,11 @@ def start(update, context):
         InlineKeyboardButton(text='Reminder System', callback_data=str(EVENT_HANDLING)),
         InlineKeyboardButton(text='Room Searching', callback_data=str(ROOM_SEARCHING))
     ]]
-    context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
-    context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
 
     context.chat_data["tele-username"] = update.message.from_user.username
+
+    context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+    context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
 
     keyboard = InlineKeyboardMarkup(buttons)
 
@@ -267,11 +268,6 @@ def stop(update, context):
 
     return END
 
-def restart(update, context):
-    """End Conversation by command."""
-    start2(update,context)
-    return END
-
 
 def end_second_level(update, context):
     """Return to top level conversation."""
@@ -283,7 +279,6 @@ def end_second_level(update, context):
 # Second level conversation callbacks
 def select_building(update, context):
     print("selected_building")
-
     text = 'Choose your action:'
 
     buttons = [[
@@ -306,7 +301,7 @@ def select_building(update, context):
 
 
 def select_building_checkin(update, context):
-
+    print("line 289 selected check in")
     print(update.callback_query.data)
 
     if update.callback_query.data == "end_checkin":
@@ -682,7 +677,7 @@ def choose_check_out_time(update, context):
 
     con.commit()
 
-    text = "You have successfully check out." + "\nType /stop and /restart to return to main menu."
+    text = "You have successfully check out." + "\nType /stop and /start to return to main menu."
 
     update.callback_query.edit_message_text(text=text)
 
@@ -743,7 +738,7 @@ def check_in_successfully(update, context):
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
            + ' to ' + roomSearch.convert_time_to_12hr(
-        end_time_text) + "\n.Type /stop and /restart to return to main menu."
+        end_time_text) + "\nType /stop and /start to return to main menu."
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
@@ -1286,7 +1281,6 @@ def main():
 
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("restart", restart))
 
     # log all errors
     dp.add_error_handler(error)
