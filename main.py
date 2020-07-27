@@ -29,27 +29,29 @@ SELECT_END_TIME2 = map(chr, range(12, 13))
 CHECK_IN_TIME = map(chr, range(13, 14))
 SUCCESSFUL_CHECK_IN = map(chr, range(14, 15))
 CHECK_OUT = map(chr, range(15, 16))
-SELECT_OPTIONS_FOR_TIMING = map(chr, range(16, 17))
+SELECT_CHECK_OUT = map(chr, range(16, 17))
+
+SELECT_OPTIONS_FOR_TIMING = map(chr, range(17, 18))
 
 # State definitions for descriptions conversation
-SELECT_OPTIONS_FOR_TIMING2 = map(chr, range(17, 18))
+SELECT_OPTIONS_FOR_TIMING2 = map(chr, range(18, 19))
 
-SELECTED_ROOM = map(chr, range(18, 19))
+SELECTED_ROOM = map(chr, range(19, 20))
 
 # Meta states
-STOPPING, SHOWING = map(chr, range(19, 21))
-END_SELECT_LEVEL = map(chr, range(21, 22))
+STOPPING, SHOWING = map(chr, range(20, 22))
+END_SELECT_LEVEL = map(chr, range(22, 23))
 
 # States for Event Handling
-EVENT_DETAILS = map(chr, range(22, 23))
-EVENT_DATE = map(chr, range(23, 24))
-TIMER = map(chr, range(24, 25))
-EVENT_DATE = map(chr, range(25, 26))
-EMAIL = map(chr, range(26, 27))
-CALENDAR = map(chr, range(27, 28))
-CONFIRM_ADD_CAL = map(chr, range(28, 29))
-EVENT_TIME = map(chr, range(29, 30))
-HANDLING_EVENT2 = map(chr, range(30, 31))
+EVENT_DETAILS = map(chr, range(23, 24))
+EVENT_DATE = map(chr, range(24, 25))
+TIMER = map(chr, range(25, 26))
+EVENT_DATE = map(chr, range(26, 27))
+EMAIL = map(chr, range(27, 28))
+CALENDAR = map(chr, range(29, 30))
+CONFIRM_ADD_CAL = map(chr, range(30, 31))
+EVENT_TIME = map(chr, range(31, 32))
+HANDLING_EVENT2 = map(chr, range(32, 33))
 
 import re
 from scheduler import book_timeslot
@@ -474,8 +476,6 @@ def choose_checkin_start_time(update, context):
 
 
 def choose_end_time(update, context):
-    print("data here is line 475")
-    print(update.callback_query.data)
     context.chat_data["callback_avail_start_time"] = update.callback_query.data
 
     text = "Please select the time." + "\n" + "From: " + roomSearch.convert_time_to_12hr(
@@ -537,7 +537,7 @@ def confirm_timing(update, context):
 
         if int(context.chat_data["callback_avail_start_time"]) == int(update.callback_query.data):
 
-            text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
+            text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr2(
                 context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
                 update.callback_query.data) + ")" + "\nSelected start time cannot be the same as selected end time." \
                    + "\nDo click edit, to change the timeframe."
@@ -661,7 +661,7 @@ def check_out_service(update, context):
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    choose_check_out_time(update, context)
+    return SELECT_CHECK_OUT
 
 
 def choose_check_out_time(update, context):
@@ -1192,6 +1192,7 @@ def main():
             FINISH_SELECTING_LEVEL2: [checking_in_convo2],
 
             CHECK_OUT: [CallbackQueryHandler(check_out_service)],
+            SELECT_CHECK_OUT : [CallbackQueryHandler(choose_check_out_time)]
         },
 
         fallbacks=[
