@@ -93,6 +93,7 @@ def start(update, context):
     ]]
     context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
     context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
+    context.chat_data["tele-username"] = update.message.from_user.username
 
     keyboard = InlineKeyboardMarkup(buttons)
 
@@ -265,6 +266,11 @@ def stop(update, context):
 
     return END
 
+def restart(update, context):
+    """End Conversation by command."""
+    start2(update,context)
+    return END
+
 
 def end_second_level(update, context):
     """Return to top level conversation."""
@@ -276,7 +282,6 @@ def end_second_level(update, context):
 # Second level conversation callbacks
 def select_building(update, context):
     print("selected_building")
-    context.chat_data["tele-username"] = update.message.from_user.username
 
     text = 'Choose your action:'
 
@@ -1282,7 +1287,7 @@ def main():
 
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("restart", help))
+    dp.add_handler(CommandHandler("restart", restart))
 
     # log all errors
     dp.add_error_handler(error)
