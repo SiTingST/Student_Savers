@@ -191,7 +191,10 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms, list_of_all_ro
     for r in unavailableRoom:
         list_of_rooms.remove(r)
 
-    available_rooms = list_of_rooms.extend(list_of_all_rooms)
+    for items in list_of_rooms:
+        list_of_all_rooms.append(items)
+
+    available_rooms = list_of_all_rooms
 
     for checked_in_rooms in sqlresult:
         checked_in_rooms = ''.join(''.join(map(str, checked_in_rooms)).split('),'))
