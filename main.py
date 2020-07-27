@@ -126,7 +126,7 @@ def start2(update, context):
     return SELECTING_ACTION
 
 
-def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
+def callNusmodApi(date, day, start_time, end_time, list_of_rooms,list_of_all_rooms):
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
     http = urllib3.PoolManager()
@@ -194,7 +194,10 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
     for r in unavailableRoom:
         list_of_rooms.remove(r)
 
-    available_rooms = list_of_rooms
+    for items in list_of_rooms:
+        list_of_all_rooms.append(items)
+
+    available_rooms = list_of_all_rooms
 
     for checked_in_rooms in sqlresult:
         checked_in_rooms = ''.join(''.join(map(str, checked_in_rooms)).split('),'))
@@ -212,17 +215,19 @@ def show_data(update, context):
     print(context.chat_data["level"])
 
     if context.chat_data["building"] == "COMS1":
-        print("coms1")
         room_label = roomSearch.com1_data(context.chat_data["level"])
+        all_rooms = roomSearch.all_rooms_com1(context.chat_data["level"])
+
     else:
-        print("coms2")
         room_label = roomSearch.com2_data(context.chat_data["level"])
+        all_rooms = roomSearch.all_rooms_com2(context.chat_data["level"])
+
 
     print(room_label)
     available_rooms_data = callNusmodApi(context.chat_data["date"], context.chat_data["day"],
                                          context.chat_data["avail_start_time"],
                                          context.chat_data["callback_avail_end_time"],
-                                         room_label)
+                                         room_label, all_rooms)
 
     if len(available_rooms_data) > 0:
 
@@ -674,12 +679,7 @@ def choose_check_out_time(update, context):
 
     text = "You have successfully check out." + "\nType /stop and /start to return to main menu."
 
-    buttons = [[
-        InlineKeyboardButton(text='Done', callback_data=str(END))
-    ]]
-
-    keyboard2 = InlineKeyboardMarkup(buttons)
-    update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
+    update.callback_query.edit_message_text(text=text)
 
 
 def end_choose_action(update, context):
