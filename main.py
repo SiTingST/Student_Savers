@@ -737,6 +737,8 @@ def select_available_room(update, context):
 
 
 def checking_in(update, context):
+
+    print("line 741")
     context.chat_data['chosen_room'] = update.callback_query.data
 
     builing_text = context.chat_data['building']
@@ -1118,8 +1120,9 @@ def main():
                                                        '23'))],
             SHOWING: [CallbackQueryHandler(select_available_room, pattern='^' + 'avail_room_check-in' + '$')],
             SELECT_OPTIONS_FOR_TIMING: selection_handlers2,
-            SELECTED_ROOM: [CallbackQueryHandler(checking_in)]
-
+            SELECTED_ROOM: [CallbackQueryHandler(checking_in)],
+            SUCCESSFULCHECK_IN_AFTER_SEARCH: [CallbackQueryHandler(end_choose_action,
+                                                                   pattern='^' + 'checkin_successful' + '$')]
         },
 
         fallbacks=[
