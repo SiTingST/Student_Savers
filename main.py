@@ -230,10 +230,7 @@ def show_data(update, context):
 
         buttons = [[
             InlineKeyboardButton(text='Check in', callback_data='avail_room_check-in'),
-            InlineKeyboardButton(text='Back', callback_data=str(END))
         ]]
-
-
     else:
         text = " No available room found"
 
