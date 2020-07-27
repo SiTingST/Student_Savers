@@ -100,40 +100,76 @@ def return_weekNo(dateNo):
 
 
 def convert_time_to_12hr(time_in_hour):
+    print("rooms search convert time")
+    print(time_in_hour)
 
-    if time_in_hour == "8" or "0800":
+    if time_in_hour == "8":
         return "8am"
-    elif time_in_hour == "9" or "0900":
+    elif time_in_hour == "9":
         return "9am"
-    elif time_in_hour == "10" or "1000":
+    elif time_in_hour == "10":
         return "10am"
-    elif time_in_hour == "11" or "1100":
+    elif time_in_hour == "11" :
         return "11am"
-    elif time_in_hour == "12" or "1200":
+    elif time_in_hour == "12":
         return "12pm"
-    elif time_in_hour == "13" or "1300":
+    elif time_in_hour == "13":
         return "1pm"
-    elif time_in_hour == "14" or "1400":
+    elif time_in_hour == "14" :
         return "2pm"
-    elif time_in_hour == "15" or "1500":
+    elif time_in_hour == "15":
         return "3pm"
-    elif time_in_hour == "16" or "1600":
+    elif time_in_hour == "16" :
         return "4pm"
-    elif time_in_hour == "17" or "1700":
+    elif time_in_hour == "17":
         return "5pm"
-    elif time_in_hour == "18" or "1800":
+    elif time_in_hour == "18":
         return "6pm"
-    elif time_in_hour == "19" or "1900":
+    elif time_in_hour == "19":
         return "7pm"
-    elif time_in_hour == "20" or "2000":
+    elif time_in_hour == "20":
         return "8pm"
-    elif time_in_hour == "21" or "2100":
+    elif time_in_hour == "21":
         return "9pm"
-    elif time_in_hour == "22" or "2200":
+    elif time_in_hour == "22":
         return "10pm"
     else:
         return "11pm"
 
+def convert_time_to_12hr2(time_in_hour):
+
+    if time_in_hour == "0800":
+        return "8am"
+    elif time_in_hour == "0900":
+        return "9am"
+    elif time_in_hour == "1000":
+        return "10am"
+    elif time_in_hour == "1100":
+        return "11am"
+    elif time_in_hour ==  "1200":
+        return "12pm"
+    elif time_in_hour == "1300":
+        return "1pm"
+    elif time_in_hour == "1400":
+        return "2pm"
+    elif time_in_hour ==  "1500":
+        return "3pm"
+    elif time_in_hour == "1600":
+        return "4pm"
+    elif time_in_hour == "1700":
+        return "5pm"
+    elif time_in_hour ==  "1800":
+        return "6pm"
+    elif time_in_hour ==  "1900":
+        return "7pm"
+    elif time_in_hour == "2000":
+        return "8pm"
+    elif time_in_hour == "2100":
+        return "9pm"
+    elif time_in_hour ==  "2200":
+        return "10pm"
+    else:
+        return "11pm"
 
 
 # all rooms in coms1 and coms2

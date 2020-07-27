@@ -4,6 +4,7 @@ import os
 
 import datetime
 from datetimerange import DateTimeRange
+
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
 from telegram import InlineKeyboardMarkup
@@ -22,17 +23,19 @@ SELECT_CHECKIN_BUILDING = map(chr, range(6, 7))
 SELECTING_ROOM = map(chr, range(7, 8))
 FINISH_SELECTING_LEVEL2 = map(chr, range(8, 9))
 SELECT_START_TIME = map(chr, range(9, 10))
-SELECT_END_TIME = map(chr, range(10, 11))
-CHECK_IN_TIME = map(chr, range(11, 12))
-SUCCESSFUL_CHECK_IN = map(chr, range(12, 13))
-CHECK_OUT = map(chr, range(13, 14))
-SELECT_OPTIONS_FOR_TIMING = map(chr, range(14, 15))
+SELECT_START_TIME2 = map(chr, range(10, 11))
+SELECT_END_TIME = map(chr, range(11, 12))
+SELECT_END_TIME2 = map(chr, range(12, 13))
+CHECK_IN_TIME = map(chr, range(13, 14))
+SUCCESSFUL_CHECK_IN = map(chr, range(14, 15))
+CHECK_OUT = map(chr, range(15, 16))
+SELECT_OPTIONS_FOR_TIMING = map(chr, range(16, 17))
 
 # State definitions for descriptions conversation
-SELECT_OPTIONS_FOR_TIMING2 = map(chr, range(15, 16))
+SELECT_OPTIONS_FOR_TIMING2 = map(chr, range(17, 18))
 
-SELECTED_ROOM = map(chr, range(17, 18))
-CHOOSE_TO_CHECK_OUT = map(chr, range(18, 19))
+SELECTED_ROOM = map(chr, range(18, 19))
+
 # Meta states
 STOPPING, SHOWING = map(chr, range(19, 21))
 END_SELECT_LEVEL = map(chr, range(21, 22))
@@ -45,8 +48,8 @@ EVENT_DATE = map(chr, range(25, 26))
 EMAIL = map(chr, range(26, 27))
 CALENDAR = map(chr, range(27, 28))
 CONFIRM_ADD_CAL = map(chr, range(28, 29))
-EVENT_TIME = map(chr, range(30, 31))
-HANDLING_EVENT2 = map(chr, range(31, 32))
+EVENT_TIME = map(chr, range(29, 30))
+HANDLING_EVENT2 = map(chr, range(30, 31))
 
 import re
 from scheduler import book_timeslot
@@ -123,7 +126,7 @@ def start2(update, context):
     return SELECTING_ACTION
 
 
-def callNusmodApi(date, day, start_time, end_time, list_of_rooms, list_of_all_rooms):
+def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
     http = urllib3.PoolManager()
@@ -191,10 +194,7 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms, list_of_all_ro
     for r in unavailableRoom:
         list_of_rooms.remove(r)
 
-    for items in list_of_rooms:
-        list_of_all_rooms.append(items)
-
-    available_rooms = list_of_all_rooms
+    available_rooms = list_of_rooms
 
     for checked_in_rooms in sqlresult:
         checked_in_rooms = ''.join(''.join(map(str, checked_in_rooms)).split('),'))
@@ -202,26 +202,27 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms, list_of_all_ro
             if avail_room == checked_in_rooms:
                 available_rooms.remove(avail_room)
 
-
-
     return available_rooms
 
 
 def show_data(update, context):
     currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
 
+    print(context.chat_data["building"])
+    print(context.chat_data["level"])
+
     if context.chat_data["building"] == "COMS1":
+        print("coms1")
         room_label = roomSearch.com1_data(context.chat_data["level"])
-        all_room_label = roomSearch.all_rooms_com1(context.chat_data["level"])
     else:
+        print("coms2")
         room_label = roomSearch.com2_data(context.chat_data["level"])
-        all_room_label = roomSearch.all_rooms_com2(context.chat_data["level"])
 
-
+    print(room_label)
     available_rooms_data = callNusmodApi(context.chat_data["date"], context.chat_data["day"],
                                          context.chat_data["avail_start_time"],
                                          context.chat_data["callback_avail_end_time"],
-                                         room_label, all_room_label)
+                                         room_label)
 
     if len(available_rooms_data) > 0:
 
@@ -237,6 +238,8 @@ def show_data(update, context):
         buttons = [[
             InlineKeyboardButton(text='Check in', callback_data='avail_room_check-in'),
         ]]
+
+
     else:
         text = " No available room found"
 
@@ -361,13 +364,11 @@ def select_level(update, context):
                 update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
         else:
-            text = 'No rooms to check out from. ' + "\n Type /stop and /start to return to main menu."
+            text = 'No rooms to check out from'
             update.callback_query.edit_message_text(text=text)
 
         return CHECK_OUT
-
     else:
-
         if update.callback_query.data == 'COMS1':
             buttons = [[
                 InlineKeyboardButton(text='Level B1', callback_data='level_B1'),
@@ -435,8 +436,6 @@ def select_level_checkin(update, context):
 
 
 def choose_start_time(update, context):
-    print("line 385")
-    print(update.callback_query.data)
     clicked_check_in_option = update.callback_query.data[0:3] == "COM"
 
     if update.callback_query.data == "end_levels":
@@ -457,6 +456,7 @@ def choose_start_time(update, context):
 
 
 def choose_checkin_start_time(update, context):
+    print("line 460")
     if update.callback_query.data != "edit":
         context.chat_data["level"] = update.callback_query.data
 
@@ -467,10 +467,12 @@ def choose_checkin_start_time(update, context):
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text, reply_markup=createTimeButtons())
 
-    return SELECT_START_TIME
+    return SELECT_START_TIME2
 
 
 def choose_end_time(update, context):
+    print("data here is line 475")
+    print(update.callback_query.data)
     context.chat_data["callback_avail_start_time"] = update.callback_query.data
 
     text = "Please select the time." + "\n" + "From: " + roomSearch.convert_time_to_12hr(
@@ -488,7 +490,26 @@ def choose_end_time(update, context):
     return SELECT_END_TIME
 
 
+def choose_end_time2(update, context):
+    context.chat_data["checkin_callback_avail_start_time"] = update.callback_query.data
+
+    text = "Please select the time." + "\nFrom: " + roomSearch.convert_time_to_12hr(
+        update.callback_query.data) + "\nTo: "
+
+    currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
+    context.chat_data["checkin_avail_start_time"] = datetime.datetime(int(currentDate.strftime("%Y")),
+                                                                      int(currentDate.strftime("%m")),
+                                                                      int(currentDate.strftime("%d")),
+                                                                      int(update.callback_query.data), 0, 0)
+
+    update.callback_query.answer()
+    update.callback_query.edit_message_text(text=text, reply_markup=createTimeButtons())
+
+    return SELECT_END_TIME2
+
+
 def confirm_timing(update, context):
+    print("confirm timing 2?")
     currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
 
     context.chat_data["avail_end_time"] = update.callback_query.data
@@ -500,9 +521,8 @@ def confirm_timing(update, context):
     if int(context.chat_data["callback_avail_start_time"]) < int(update.callback_query.data):
 
         text = "Searching for room in " + context.chat_data["level"].replace('_', ' ') + " of " + context.chat_data[
-            "building"] + "\n" + \
-               "From: " + roomSearch.convert_time_to_12hr(
-            context.chat_data["callback_avail_start_time"]) + "\n " + "To: " \
+            "building"] + "\nFrom: " + roomSearch.convert_time_to_12hr(
+            context.chat_data["callback_avail_start_time"]) + "\nTo: " \
                + roomSearch.convert_time_to_12hr(update.callback_query.data);
 
         buttons = [[
@@ -516,15 +536,15 @@ def confirm_timing(update, context):
 
             text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
                 context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
-                update.callback_query.data) + ")" + "\n " + "Selected start time cannot be the same as selected end time." \
-                   + "\n" + "Do click edit, to change the timeframe."
+                update.callback_query.data) + ")" + "\nSelected start time cannot be the same as selected end time." \
+                   + "\nDo click edit, to change the timeframe."
 
         else:
 
             text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
                 context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
-                update.callback_query.data) + ")" + "\n " + "Selected start time cannot be more than selected end time." \
-                   + "\n" + "Do click edit, to change the timeframe."
+                update.callback_query.data) + ")" + "\nSelected start time cannot be more than selected end time." \
+                   + "\nDo click edit, to change the timeframe."
 
         buttons = [[
             InlineKeyboardButton(text='Edit', callback_data='edit'),
@@ -538,19 +558,22 @@ def confirm_timing(update, context):
 
 
 def confirm_timing2(update, context):
+    print("here confirm timng2")
+    print(update.callback_query.data)
+
     currentDate = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
 
-    context.chat_data["avail_end_time"] = update.callback_query.data
-    context.chat_data["callback_avail_end_time"] = datetime.datetime(int(currentDate.strftime("%Y")),
-                                                                     int(currentDate.strftime("%m")),
-                                                                     int(currentDate.strftime("%d")),
-                                                                     int(update.callback_query.data), 0, 0)
+    context.chat_data["checkin_avail_end_time"] = update.callback_query.data
+    context.chat_data["checkin_callback_avail_end_time"] = datetime.datetime(int(currentDate.strftime("%Y")),
+                                                                             int(currentDate.strftime("%m")),
+                                                                             int(currentDate.strftime("%d")),
+                                                                             int(update.callback_query.data), 0, 0)
 
-    if int(context.chat_data["callback_avail_start_time"]) < int(update.callback_query.data):
+    if int(context.chat_data["checkin_callback_avail_start_time"]) < int(update.callback_query.data):
 
-        text = "Checking into " + context.chat_data["chosen_room"] + "\n" + "From: " + \
-               roomSearch.convert_time_to_12hr(context.chat_data["callback_avail_start_time"]) \
-               + "\n" + "To: " + roomSearch.convert_time_to_12hr(update.callback_query.data);
+        text = "Checking into " + context.chat_data["chosen_room"] + "\nFrom: " + \
+               roomSearch.convert_time_to_12hr(context.chat_data["checkin_callback_avail_start_time"]) \
+               + "\nTo: " + roomSearch.convert_time_to_12hr(update.callback_query.data);
 
         buttons = [[
             InlineKeyboardButton(text='Edit', callback_data='edit'),
@@ -564,9 +587,9 @@ def confirm_timing2(update, context):
     else:
 
         text = "Invalid time frame. (From: " + roomSearch.convert_time_to_12hr(
-            context.chat_data["callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
-            update.callback_query.data) + ")" + "\n" + "Selected start time cannot be more than selected end time." \
-               + "\n" + "Do click edit, to change the timeframe."
+            context.chat_data["checkin_callback_avail_start_time"]) + " to " + roomSearch.convert_time_to_12hr(
+            update.callback_query.data) + ")" + "\nSelected start time cannot be more than selected end time." \
+               + "\nDo click edit, to change the timeframe."
 
         buttons = [[
             InlineKeyboardButton(text='Edit', callback_data='edit'),
@@ -589,6 +612,9 @@ def show_all_level(update, context):
         buttons = []
 
         if context.chat_data["building"] == "COMS1":
+
+            print("hello woeld")
+            print(str(update.callback_query.data).split('_')[0])
 
             rooms_coms1 = roomSearch.all_rooms_com1("level " + str(update.callback_query.data).split('_')[0])
             text = 'Choose a room to check into: '
@@ -632,25 +658,28 @@ def check_out_service(update, context):
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    return CHOOSE_TO_CHECK_OUT
+    choose_check_out_time(update, context)
 
 
 def choose_check_out_time(update, context):
-    print("checkout")
-    print(str(update.callback_query.data).split('-')[0])
-    print(str(update.callback_query.data).split('-')[1])
+    date_text = context.chat_data['date'].strftime("%Y-%m-%d")
 
     cur.execute(
-        "DELETE FROM studentsavers.rooms WHERE room_no = %s AND start_time = %s AND end_time = %s "
-        "AND username = %s",
+        "DELETE FROM studentsavers.rooms WHERE room_no = %s AND start_time = %s AND end_time = %s AND date =%s AND username = %s",
         [context.chat_data["checkout_room"], str(update.callback_query.data).split('-')[0],
-         str(update.callback_query.data).split('-')[1], context.chat_data["tele-username"]])
+         str(update.callback_query.data).split('-')[1],
+         date_text, context.chat_data["tele-username"]])
 
     con.commit()
 
-    text = "You have successfully check out." + "\n Type /stop and /start to return to main menu."
+    text = "You have successfully check out." + "\nType /stop and /start to return to main menu."
 
-    update.callback_query.edit_message_text(text=text)
+    buttons = [[
+        InlineKeyboardButton(text='Done', callback_data=str(END))
+    ]]
+
+    keyboard2 = InlineKeyboardMarkup(buttons)
+    update.callback_query.edit_message_text(text=text, reply_markup=keyboard2)
 
 
 def end_choose_action(update, context):
@@ -662,7 +691,7 @@ def end_choose_action(update, context):
 
 def stop_nested(update, context):
     """Completely end conversation from within nested conversation."""
-    update.message.reply_text('Hope to see you again!')
+    update.message.reply_text('Hope to see you again!.')
 
     return STOPPING
 
@@ -683,11 +712,16 @@ def confirm_time(update, context):
 
 
 def check_in_successfully(update, context):
+    print("sucessful check in line 688")
+
     builing_text = str(context.chat_data['building']).split("_")[0]
     level_text = context.chat_data['level']
     room_no_text = context.chat_data['chosen_room']
-    start_time_text = context.chat_data['callback_avail_start_time']
-    end_time_text = context.chat_data['callback_avail_end_time'].strftime("%H")
+    start_time_text = context.chat_data['checkin_callback_avail_start_time']
+    end_time_text = context.chat_data['checkin_callback_avail_end_time'].strftime("%H")
+
+    print(start_time_text)
+    print(end_time_text)
 
     date_text = context.chat_data['date'].strftime("%Y-%m-%d")
     username_text = context.chat_data["tele-username"]
@@ -703,7 +737,8 @@ def check_in_successfully(update, context):
 
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n Type /stop and /start to return to main menu."
+           + ' to ' + roomSearch.convert_time_to_12hr(
+        end_time_text) + "\nType /stop and /start to return to main menu."
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
@@ -726,7 +761,7 @@ def select_available_room(update, context):
 
 
 def checking_in(update, context):
-    print("line 741")
+    print("check in line 731")
     context.chat_data['chosen_room'] = update.callback_query.data
 
     builing_text = context.chat_data['building']
@@ -747,12 +782,10 @@ def checking_in(update, context):
 
     con.commit()
 
-    text = 'You have successfully check in to ' + room_no_text \
-           + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n Type /stop and /start to return to main menu"
+    text2 = 'You have successfully check in to ' + room_no_text \
+            + ' from ' + start_time_text + ' to ' + end_time_text + "\nType /stop and /start to return to main menu."
 
-    update.callback_query.answer()
-    update.callback_query.edit_message_text(text=text)
+    update.callback_query.edit_message_text(text=text2)
 
 
 # Sending reminders
@@ -947,7 +980,8 @@ def confirm_add_to_calendar(update, context):
 
 
 def help(update, context):
-    update.message.reply_text('If the bot is stuck, do type in /stop and /start to restart it.')
+    """Send a message when the command /help is issued."""
+    update.message.reply_text('Help!')
 
 
 # Error handler
@@ -966,7 +1000,7 @@ def main():
     dp = updater.dispatcher
 
     selection_handlers3 = [
-        CallbackQueryHandler(choose_start_time, pattern='^' + 'edit' + '$'),
+        CallbackQueryHandler(choose_checkin_start_time, pattern='^' + 'edit' + '$'),
         CallbackQueryHandler(check_in_successfully, pattern='^' + 'continue' + '$')
     ]
 
@@ -976,48 +1010,49 @@ def main():
 
         states={
 
-            SELECT_START_TIME: [CallbackQueryHandler(choose_end_time,
-                                                     pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
-                                                             '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'
-                                                     .format('8',
-                                                             '9',
-                                                             '10',
-                                                             '11',
-                                                             '12',
-                                                             '13',
-                                                             '14',
-                                                             '15',
-                                                             '16',
-                                                             '17',
-                                                             '18',
-                                                             '19',
-                                                             '20',
-                                                             '21',
-                                                             '22',
-                                                             '23'))],
+            SELECT_START_TIME2: [CallbackQueryHandler(choose_end_time2,
+                                                      pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
+                                                              '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'
+                                                      .format('8',
+                                                              '9',
+                                                              '10',
+                                                              '11',
+                                                              '12',
+                                                              '13',
+                                                              '14',
+                                                              '15',
+                                                              '16',
+                                                              '17',
+                                                              '18',
+                                                              '19',
+                                                              '20',
+                                                              '21',
+                                                              '22',
+                                                              '23'))],
 
-            SELECT_END_TIME: [CallbackQueryHandler(confirm_timing2,
-                                                   pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
-                                                           '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'.format(
-                                                       '8',
-                                                       '9',
-                                                       '10',
-                                                       '11',
-                                                       '12',
-                                                       '13',
-                                                       '14',
-                                                       '15',
-                                                       '16',
-                                                       '17',
-                                                       '18',
-                                                       '19',
-                                                       '20',
-                                                       '21',
-                                                       '22',
-                                                       '23'))],
+            SELECT_END_TIME2: [CallbackQueryHandler(confirm_timing2,
+                                                    pattern='^{0}$|^{1}$|^{2}$|^{3}$|^{4}$|^{5}$|^{6}$|^{7}$|^{'
+                                                            '8}$|^{9}$|^{10}$|^{11}$|^{12}$|^{13}$|^{14}$|^{15}$'.format(
+                                                        '8',
+                                                        '9',
+                                                        '10',
+                                                        '11',
+                                                        '12',
+                                                        '13',
+                                                        '14',
+                                                        '15',
+                                                        '16',
+                                                        '17',
+                                                        '18',
+                                                        '19',
+                                                        '20',
+                                                        '21',
+                                                        '22',
+                                                        '23'))],
 
             SELECT_OPTIONS_FOR_TIMING2: selection_handlers3,
             SUCCESSFUL_CHECK_IN: [CallbackQueryHandler(check_in_successfully)]
+
         },
 
         fallbacks=[
@@ -1100,6 +1135,7 @@ def main():
             SHOWING: [CallbackQueryHandler(select_available_room, pattern='^' + 'avail_room_check-in' + '$')],
             SELECT_OPTIONS_FOR_TIMING: selection_handlers2,
             SELECTED_ROOM: [CallbackQueryHandler(checking_in)]
+
         },
 
         fallbacks=[
@@ -1149,7 +1185,6 @@ def main():
             FINISH_SELECTING_LEVEL2: [checking_in_convo2],
 
             CHECK_OUT: [CallbackQueryHandler(check_out_service)],
-            CHOOSE_TO_CHECK_OUT: [CallbackQueryHandler(choose_check_out_time)]
         },
 
         fallbacks=[
@@ -1248,7 +1283,6 @@ def main():
 
     # log all errors
     dp.add_error_handler(error)
-    # Start the Bot
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TOKEN)
