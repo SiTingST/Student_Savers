@@ -123,7 +123,7 @@ def start2(update, context):
     return SELECTING_ACTION
 
 
-def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
+def callNusmodApi(date, day, start_time, end_time, list_of_rooms, list_of_all_rooms):
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
     http = urllib3.PoolManager()
@@ -191,13 +191,15 @@ def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
     for r in unavailableRoom:
         list_of_rooms.remove(r)
 
-    available_rooms = list_of_rooms
+    available_rooms = list_of_rooms.extend(list_of_all_rooms)
 
     for checked_in_rooms in sqlresult:
         checked_in_rooms = ''.join(''.join(map(str, checked_in_rooms)).split('),'))
         for avail_room in available_rooms:
             if avail_room == checked_in_rooms:
                 available_rooms.remove(avail_room)
+
+
 
     return available_rooms
 
@@ -207,13 +209,16 @@ def show_data(update, context):
 
     if context.chat_data["building"] == "COMS1":
         room_label = roomSearch.com1_data(context.chat_data["level"])
+        all_room_label = roomSearch.all_rooms_com1(context.chat_data["level"])
     else:
         room_label = roomSearch.com2_data(context.chat_data["level"])
+        all_room_label = roomSearch.all_rooms_com2(context.chat_data["level"])
+
 
     available_rooms_data = callNusmodApi(context.chat_data["date"], context.chat_data["day"],
                                          context.chat_data["avail_start_time"],
                                          context.chat_data["callback_avail_end_time"],
-                                         room_label)
+                                         room_label, all_room_label)
 
     if len(available_rooms_data) > 0:
 
