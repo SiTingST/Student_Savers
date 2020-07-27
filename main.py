@@ -48,8 +48,6 @@ CONFIRM_ADD_CAL = map(chr, range(28, 29))
 EVENT_TIME = map(chr, range(30, 31))
 HANDLING_EVENT2 = map(chr, range(31, 32))
 
-
-
 import re
 from scheduler import book_timeslot
 from telegram_cal import create_calendar
@@ -61,8 +59,8 @@ END = ConversationHandler.END
 bot_data = {
     'event_name': '',
     'event_detail': '',
-    'event_date':'',
-    'event_time':''
+    'event_date': '',
+    'event_time': ''
 }
 
 PORT = int(os.environ.get('PORT', 5000))
@@ -104,6 +102,7 @@ def start(update, context):
 
     return SELECTING_ACTION
 
+
 def start2(update, context):
     text = 'Hi, welcome to Studentsavers bot. Glad to have you here. What do you want to do? Room Searching is only ' \
            'available for SoC buildings. To abort, simply type /stop.'
@@ -123,10 +122,9 @@ def start2(update, context):
 
     return SELECTING_ACTION
 
+
 def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
-
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
-
 
     http = urllib3.PoolManager()
     json_obj = http.request('GET', url)
@@ -247,11 +245,13 @@ def show_data(update, context):
 
     return SHOWING
 
+
 def stop(update, context):
     """End Conversation by command."""
     update.message.reply_text('See you around!')
 
     return END
+
 
 def end_second_level(update, context):
     """Return to top level conversation."""
@@ -262,7 +262,6 @@ def end_second_level(update, context):
 
 # Second level conversation callbacks
 def select_building(update, context):
-
     print("selected_building")
     text = 'Choose your action:'
 
@@ -286,7 +285,6 @@ def select_building(update, context):
 
 
 def select_building_checkin(update, context):
-
     print("line 289 selected check in")
     print(update.callback_query.data)
 
@@ -389,7 +387,6 @@ def select_level(update, context):
 
 
 def select_level_checkin(update, context):
-
     print("line 394")
     print(update.callback_query.data)
     context.chat_data["building"] = update.callback_query.data.split("_")[0]
@@ -630,24 +627,20 @@ def check_out_service(update, context):
     return CHOOSE_TO_CHECK_OUT
 
 
-
 def choose_check_out_time(update, context):
-    date_text = context.chat_data['date'].strftime("%Y-%m-%d")
-
     print("checkout")
     print(str(update.callback_query.data).split('-')[0])
     print(str(update.callback_query.data).split('-')[1])
 
     cur.execute(
-        "DELETE FROM studentsavers.rooms WHERE room_no = %s AND start_time = %s AND end_time = %s AND date =%s "
+        "DELETE FROM studentsavers.rooms WHERE room_no = %s AND start_time = %s AND end_time = %s "
         "AND username = %s",
         [context.chat_data["checkout_room"], str(update.callback_query.data).split('-')[0],
-         str(update.callback_query.data).split('-')[1],
-         date_text, context.chat_data["tele-username"]])
+         str(update.callback_query.data).split('-')[1], context.chat_data["tele-username"]])
 
     con.commit()
 
-    text = "You have successfully check out." + "\n Type /stop and /start to restart the bot."
+    text = "You have successfully check out." + "\n Type /stop and /start to return to main menu."
 
     update.callback_query.edit_message_text(text=text)
 
@@ -658,11 +651,13 @@ def end_choose_action(update, context):
 
     return END
 
+
 def stop_nested(update, context):
     """Completely end conversation from within nested conversation."""
     update.message.reply_text('Hope to see you again!.')
 
     return STOPPING
+
 
 def confirm_time(update, context):
     text = 'Got it! Do click on the respective buttons to move on.'
@@ -680,7 +675,6 @@ def confirm_time(update, context):
 
 
 def check_in_successfully(update, context):
-
     builing_text = str(context.chat_data['building']).split("_")[0]
     level_text = context.chat_data['level']
     room_no_text = context.chat_data['chosen_room']
@@ -701,11 +695,10 @@ def check_in_successfully(update, context):
 
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n type /stop and /start to restart the bot."
+           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n Type /stop and /start to return to main menu."
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
-
 
 
 def select_available_room(update, context):
@@ -725,7 +718,6 @@ def select_available_room(update, context):
 
 
 def checking_in(update, context):
-
     print("line 741")
     context.chat_data['chosen_room'] = update.callback_query.data
 
@@ -749,10 +741,11 @@ def checking_in(update, context):
 
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n type /stop and /start to restart the bot"
+           + ' to ' + roomSearch.convert_time_to_12hr(end_time_text) + "\n Type /stop and /start to return to main menu"
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
+
 
 # Sending reminders
 
@@ -764,6 +757,7 @@ def event_handling(update, context):
     update.callback_query.edit_message_text(text=text)
 
     return HANDLING_EVENT
+
 
 def edit_event_name(update, context):
     text = 'Please enter the event name'
@@ -819,7 +813,7 @@ def set_event_time(update, context):
 
     text = 'Please send /confirm to continue, otherwise /edit'
 
-    context.bot.send_message(chat_id = update.message.chat_id, text=text)
+    context.bot.send_message(chat_id=update.message.chat_id, text=text)
 
     # update.message.reply_text(text=text)
 
@@ -871,7 +865,8 @@ def set_timer(update, context):
 
 
 def alarm(context):
-    event = 'Reminder \n\n' + context.job.context['event_name'] + '\n' + context.job.context['event_detail'] + '\non ' + context.job.context['event_date'] + ' at ' + context.job.context['event_time']
+    event = 'Reminder \n\n' + context.job.context['event_name'] + '\n' + context.job.context['event_detail'] + '\non ' + \
+            context.job.context['event_date'] + ' at ' + context.job.context['event_time']
 
     context.bot.send_message(context.job.context['chat_id'], text=event)
 
@@ -888,12 +883,13 @@ def add_to_calendar(update, context):
 
 def check_email(email):
     regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-    if(re.search(regex, email)):
+    if (re.search(regex, email)):
         logger.info("Valid email")
         return True
     else:
         logger.info("Invalid email")
         return False
+
 
 def ask_confirm_add_cal(update, context):
     message = update.message.text
@@ -906,6 +902,7 @@ def ask_confirm_add_cal(update, context):
 
     return EMAIL
 
+
 def ask_for_email(update, context):
     message = update.message.text
 
@@ -917,6 +914,7 @@ def ask_for_email(update, context):
 
     return CALENDAR
 
+
 def confirm_add_to_calendar(update, context):
     input_email = context.chat_data['user_email']
     event_name = context.chat_data['event_name']
@@ -924,7 +922,7 @@ def confirm_add_to_calendar(update, context):
     event_date = context.chat_data['event_date']
     event_time = context.chat_data['event_time']
 
-    if(check_email(input_email) == True):
+    if (check_email(input_email) == True):
         response = book_timeslot(event_name, event_detail, event_date, event_time, input_email)
         if (response == True):
             text = 'Event has been added to Google Calendar'
@@ -932,7 +930,7 @@ def confirm_add_to_calendar(update, context):
             text = 'Errors'
 
         update.message.reply_text(text)
-        return end_second_level(update,context)
+        return end_second_level(update, context)
     else:
         text = 'Please enter a valid email'
         update.message.reply_text(text)
@@ -941,7 +939,6 @@ def confirm_add_to_calendar(update, context):
 
 
 def help(update, context):
-
     update.message.reply_text('If the bot is stuck, do type in /stop and /start to restart it.')
 
 
@@ -1028,9 +1025,9 @@ def main():
 
     select_building_option_handler = [
         CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$'.format('COMS1',
-                                                                                    'COMS2',
-                                                                                    'checkout',
-                                                                                    )),
+                                                                              'COMS2',
+                                                                              'checkout',
+                                                                              )),
         CallbackQueryHandler(select_building_checkin, pattern='^{0}$|^{1}$'.format('checkin', 'end_checkin'))]
 
     # Set up third level ConversationHandler (collecting features)
@@ -1111,9 +1108,9 @@ def main():
 
     select_building_option_handler = [
         CallbackQueryHandler(select_level, pattern='^{0}$|^{1}$|^{2}$'.format('COMS1',
-                                                                                    'COMS2',
-                                                                                    'checkout',
-                                                                                    )),
+                                                                              'COMS2',
+                                                                              'checkout',
+                                                                              )),
 
         CallbackQueryHandler(select_building_checkin, pattern='^{0}$|^{1}$'.format('checkin', 'end_checkin'))]
 
@@ -1144,7 +1141,7 @@ def main():
             FINISH_SELECTING_LEVEL2: [checking_in_convo2],
 
             CHECK_OUT: [CallbackQueryHandler(check_out_service)],
-            CHOOSE_TO_CHECK_OUT : [CallbackQueryHandler(choose_check_out_time)]
+            CHOOSE_TO_CHECK_OUT: [CallbackQueryHandler(choose_check_out_time)]
         },
 
         fallbacks=[
@@ -1165,7 +1162,6 @@ def main():
         }
     )
 
-
     # Event handling ConversationHandler
     event_handling_convo = ConversationHandler(
         entry_points=[CallbackQueryHandler(event_handling,
@@ -1185,7 +1181,7 @@ def main():
                 MessageHandler(Filters.text, set_event_time)
             ],
             TIMER: [
-                CommandHandler('confirm', set_timer, pass_args=True, pass_job_queue=True , pass_chat_data=True),
+                CommandHandler('confirm', set_timer, pass_args=True, pass_job_queue=True, pass_chat_data=True),
                 CommandHandler('edit', edit_event_name)
             ],
             CONFIRM_ADD_CAL: [
@@ -1210,14 +1206,13 @@ def main():
             CommandHandler('stop', stop_nested)
         ],
 
-        map_to_parent = {
+        map_to_parent={
             # Return to top level menu
             END: SELECTING_ACTION,
             # End conversation alltogether
             STOPPING: END,
         }
     )
-
 
     # Set up top level ConversationHandler (selecting action)
     # Because the states of the third level conversation map to the ones of the second level
@@ -1250,6 +1245,7 @@ def main():
                           port=int(PORT),
                           url_path=TOKEN)
     updater.bot.setWebhook('https://student-saversbot.herokuapp.com/' + TOKEN)
+
 
 if __name__ == '__main__':
     main()
