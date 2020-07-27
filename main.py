@@ -653,7 +653,7 @@ def check_out_service(update, context):
     buttons = [];
 
     for timing in time_result:
-        print(timing)
+        print(str(timing).split('),'))
         print(roomSearch.convert_time_to_12hr2(timing))
 
         timing = ('').join(('-'.join(map(str, timing)).split('),')))
