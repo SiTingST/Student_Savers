@@ -653,7 +653,7 @@ def check_out_service(update, context):
     buttons = [];
     for timing in time_result:
         timing = ('').join(('-'.join(map(str, timing)).split('),')))
-        buttons.append([InlineKeyboardButton(text=timing, callback_data=timing)])
+        buttons.append([InlineKeyboardButton(text=roomSearch.convert_time_to_12hr2(timing), callback_data=timing)])
 
     keyboard = InlineKeyboardMarkup(buttons)
 
