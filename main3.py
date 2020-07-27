@@ -127,6 +127,7 @@ def start2(update, context):
 def callNusmodApi(date, day, start_time, end_time, list_of_rooms):
 
     print("hosted on bot")
+    print("today day is " + day)
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
 
