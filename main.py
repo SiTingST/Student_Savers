@@ -738,7 +738,7 @@ def check_in_successfully(update, context):
     text = 'You have successfully check in to ' + room_no_text \
            + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
            + ' to ' + roomSearch.convert_time_to_12hr(
-        end_time_text) + "\nType /stop and /start to return to main menu."
+        end_time_text) + "\n.Type /stop and /start to return to main menu."
 
     update.callback_query.answer()
     update.callback_query.edit_message_text(text=text)
@@ -783,7 +783,8 @@ def checking_in(update, context):
     con.commit()
 
     text2 = 'You have successfully check in to ' + room_no_text \
-            + ' from ' + roomSearch.convert_time_to_12hr2(start_time_text) + ' to ' + roomSearch.convert_time_to_12hr2(end_time_text) + "\nType /stop and /start to return to main menu."
+            + ' from ' + roomSearch.convert_time_to_12hr2(start_time_text) + ' to ' \
+            + roomSearch.convert_time_to_12hr2(end_time_text) + ".\nType /stop and /start to return to main menu."
 
     update.callback_query.edit_message_text(text=text2)
 
