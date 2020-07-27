@@ -92,7 +92,6 @@ def start(update, context):
         InlineKeyboardButton(text='Room Searching', callback_data=str(ROOM_SEARCHING))
     ]]
 
-    context.chat_data["tele-username"] = update.message.from_user.username
 
     context.chat_data["date"] = datetime.datetime.now(pytz.timezone('Asia/Singapore'))
     context.chat_data["day"] = datetime.datetime.now(pytz.timezone('Asia/Singapore')).strftime("%A")
@@ -279,6 +278,8 @@ def end_second_level(update, context):
 # Second level conversation callbacks
 def select_building(update, context):
     print("selected_building")
+    context.chat_data["tele-username"] = update.message.from_user.username
+
     text = 'Choose your action:'
 
     buttons = [[
