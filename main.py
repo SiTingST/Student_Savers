@@ -128,7 +128,7 @@ def start2(update, context):
     return SELECTING_ACTION
 
 
-def callNusmodApi(date, day, start_time, end_time, list_of_rooms,list_of_all_rooms):
+def callNusmodApi(date, day, start_time, end_time, list_of_rooms, list_of_all_rooms):
     url = "https://api.nusmods.com/v2/2020-2021/semesters/1/venueInformation.json"
 
     http = urllib3.PoolManager()
@@ -223,7 +223,6 @@ def show_data(update, context):
     else:
         room_label = roomSearch.com2_data(context.chat_data["level"])
         all_rooms = roomSearch.all_rooms_com2(context.chat_data["level"])
-
 
     print(room_label)
     available_rooms_data = callNusmodApi(context.chat_data["date"], context.chat_data["day"],
@@ -715,13 +714,8 @@ def check_in_successfully(update, context):
     builing_text = str(context.chat_data['building']).split("_")[0]
     level_text = context.chat_data['level']
     room_no_text = context.chat_data['chosen_room']
-    start_time_text = context.chat_data['checkin_callback_avail_start_time']
-    end_time_text = context.chat_data['checkin_callback_avail_end_time'].strftime("%H")
-
-    print(level_text)
-
-    print(start_time_text)
-    print(end_time_text)
+    start_time_text = context.chat_data['avail_start_time'].strftime("%H%M")
+    end_time_text = context.chat_data['callback_avail_end_time'].strftime("%H%M")
 
     date_text = context.chat_data['date'].strftime("%Y-%m-%d")
     username_text = context.chat_data["tele-username"]
@@ -736,8 +730,8 @@ def check_in_successfully(update, context):
     con.commit()
 
     text = 'You have successfully check in to ' + room_no_text \
-           + ' from ' + roomSearch.convert_time_to_12hr(start_time_text) \
-           + ' to ' + roomSearch.convert_time_to_12hr(
+           + ' from ' + roomSearch.convert_time_to_12hr2(start_time_text) \
+           + ' to ' + roomSearch.convert_time_to_12hr2(
         end_time_text) + "\nType /stop and /start to return to main menu."
 
     update.callback_query.answer()
@@ -1192,7 +1186,7 @@ def main():
             FINISH_SELECTING_LEVEL2: [checking_in_convo2],
 
             CHECK_OUT: [CallbackQueryHandler(check_out_service)],
-            SELECT_CHECK_OUT : [CallbackQueryHandler(choose_check_out_time)]
+            SELECT_CHECK_OUT: [CallbackQueryHandler(choose_check_out_time)]
         },
 
         fallbacks=[
