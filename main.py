@@ -1284,6 +1284,9 @@ def main():
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler("help", help))
 
+    #run locally
+    #updater.start_polling()
+
     # log all errors
     dp.add_error_handler(error)
     updater.start_webhook(listen="0.0.0.0",
