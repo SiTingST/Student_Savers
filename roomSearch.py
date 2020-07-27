@@ -101,35 +101,35 @@ def return_weekNo(dateNo):
 
 def convert_time_to_12hr(time_in_hour):
 
-    if time_in_hour == "8":
+    if time_in_hour == "8" or "0800":
         return "8am"
-    elif time_in_hour == "9":
+    elif time_in_hour == "9" or "0900":
         return "9am"
-    elif time_in_hour == "10":
+    elif time_in_hour == "10" or "1000":
         return "10am"
-    elif time_in_hour == "11":
+    elif time_in_hour == "11" or "1100":
         return "11am"
-    elif time_in_hour == "12":
+    elif time_in_hour == "12" or "1200":
         return "12pm"
-    elif time_in_hour == "13":
+    elif time_in_hour == "13" or "1300":
         return "1pm"
-    elif time_in_hour == "14":
+    elif time_in_hour == "14" or "1400":
         return "2pm"
-    elif time_in_hour == "15":
+    elif time_in_hour == "15" or "1500":
         return "3pm"
-    elif time_in_hour == "16":
+    elif time_in_hour == "16" or "1600":
         return "4pm"
-    elif time_in_hour == "17":
+    elif time_in_hour == "17" or "1700":
         return "5pm"
-    elif time_in_hour == "18":
+    elif time_in_hour == "18" or "1800":
         return "6pm"
-    elif time_in_hour == "19":
+    elif time_in_hour == "19" or "1900":
         return "7pm"
-    elif time_in_hour == "20":
+    elif time_in_hour == "20" or "2000":
         return "8pm"
-    elif time_in_hour == "21":
+    elif time_in_hour == "21" or "2100":
         return "9pm"
-    elif time_in_hour == "22":
+    elif time_in_hour == "22" or "2200":
         return "10pm"
     else:
         return "11pm"
@@ -141,17 +141,17 @@ def convert_time_to_12hr(time_in_hour):
 def all_rooms_com1(level):
     room_array = [];
 
-    if level == "level_B1":
+    if level == "level_B1" or "B1":
         room_array = ["COM1-B06", "COM1-B07", "COM1-B102", "COM1-B103"]
 
-    elif level == "level_1":
+    elif level == "level_1" or "1":
         room_array = ["COM1-0112", "COM1-0113", "COM1-0114", "COM1-0118", "COM1-0122"]
 
-    elif level == "level_2":
+    elif level == "level_2" or "2":
         room_array = ["COM1-0207", "COM1-0208", "COM1-0209",
                       "COM1-0210", "COM1-0213", "COM1-0217"]
 
-    elif level == "level_3":
+    elif level == "level_3" or "3":
         room_array = ["COM1-0319", "COM1-0328"]
 
     return room_array
@@ -160,13 +160,13 @@ def all_rooms_com1(level):
 def all_rooms_com2(level):
     print(level)
     room_label = [];
-    if level == "level_1":
+    if level == "level_1" or "1":
         room_label = ["COM2-0108"]
-    elif level == "level_2":
+    elif level == "level_2" or "2":
         room_label = ["COM2-0212", "COM2-0220", "COM2-0223", "COM2-0224", "COM2-0226"]
-    elif level == "level_3":
+    elif level == "level_3" or "3":
         room_label = ["COM2-0314", "COM2-0319", "COM2-0328", "COM2-0330"]
-    elif level == "level_4":
+    elif level == "level_4" or "4":
         room_label = ["COM2-0402", "COM2-0406"]
 
     return room_label
