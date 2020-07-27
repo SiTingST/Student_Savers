@@ -463,9 +463,7 @@ def choose_start_time(update, context):
 def choose_checkin_start_time(update, context):
     print("line 460")
     if update.callback_query.data != "edit":
-        context.chat_data["level"] = update.callback_query.data
-
-    context.chat_data["chosen_room"] = update.callback_query.data
+        context.chat_data["chosen_room"] = update.callback_query.data
 
     text = "Please select the time." + "\n" + " From: "
 
@@ -719,6 +717,8 @@ def check_in_successfully(update, context):
     room_no_text = context.chat_data['chosen_room']
     start_time_text = context.chat_data['checkin_callback_avail_start_time']
     end_time_text = context.chat_data['checkin_callback_avail_end_time'].strftime("%H")
+
+    print(level_text)
 
     print(start_time_text)
     print(end_time_text)
